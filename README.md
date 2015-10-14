@@ -27,6 +27,3 @@ R> ?method
 
 example of viewing the SES method man-page
 R> ?SES
-
-
-
