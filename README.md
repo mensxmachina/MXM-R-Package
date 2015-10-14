@@ -19,13 +19,13 @@ URL:	http://www.mensxmachina.org/
 -----------------------------------------------------------------------------------
 
 In order to install the package: 
-
 R> install.packages("MXM")
 R> library(MXM)
 
-# Help and man pages for MXM methods:
+Help and man pages for MXM methods:
 R> ?method
-#example of viewing the SES method manpage
+
+example of viewing the SES method man-page
 R> ?SES
 
 
