@@ -1,0 +1,69 @@
+useDynLib(MXM, .registration = TRUE)
+
+#testIndFisher
+importFrom("stats", coef)
+importFrom("stats", resid)
+importFrom("stats", cor)
+
+#testIndLogistic
+importFrom("stats", model.frame)
+importFrom("stats", model.matrix)
+importFrom("stats", glm.fit)
+importFrom("stats", deviance)
+importFrom("stats", as.formula)
+importFrom("stats", pchisq)
+importFrom("nnet", multinom)
+importFrom("ordinal", clm)
+
+#testIndRQ
+importFrom("quantreg", rq)
+importFrom("lmtest", lrtest)
+
+#testIndBeta
+importFrom("betareg", betareg)
+
+#testIndNB
+importFrom("MASS", glm.nb)
+
+#testIndPois
+importFrom("stats", glm)
+importFrom("stats", anova)
+
+#testIndReg
+importFrom("MASS", rlm)
+importFrom("stats", lm)
+
+importFrom("survival", is.Surv, coxph)
+#importFrom("VGAM", vglm, multinomial, deviance)
+#importFrom("MASS", polr )
+
+#cv.ses
+importFrom("ROCR", prediction, performance)
+importFrom("Hmisc", rcorr.cens)
+importFrom("TunePareto", generateCVRuns)
+
+#more
+importFrom("methods", new)
+importFrom("stats", predict)
+#importFrom("survival", predict.coxph)
+importFrom("stats", predict.lm)
+importFrom("utils", combn)
+importFrom("stats", var)
+importFrom("stats", pt)
+importFrom("stats", poisson)
+importFrom("stats", binomial)
+importFrom("stats", family)
+
+importFrom("graphics", barplot)
+importFrom("graphics", grid)
+importFrom("graphics", lines)
+importFrom("graphics", legend)
+importFrom("graphics", axis)
+
+importFrom("pcalg", gSquareBin, gSquareDis)
+#importFrom("gRbase", combnPrim)
+#importFrom("Biobase", exprs)
+
+export(SES, InternalSES, censIndLR, gSquare, testIndFisher, testIndLogistic, testIndRQ, testIndBeta, testIndNB, testIndPois, testIndReg, cv.ses, auc.mxm, acc.mxm, mse.mxm, ci.mxm, glm.mxm, lm.mxm, coxph.mxm)
+exportClasses("SESoutput")
+exportMethods("plot", "summary")

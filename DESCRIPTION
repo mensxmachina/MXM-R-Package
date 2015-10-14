@@ -1,0 +1,18 @@
+Package: MXM
+Type: Package
+Title: Discovering Multiple, Statistically-Equivalent Signatures
+Version: 0.5
+URL: http://www.mensxmachina.org/
+Date: 2015-09-29
+Author: Ioannis Tsamardinos, Vincenzo Lagani, Giorgos Athineou, Michail Tsagris, Giorgos Borboudakis
+Maintainer: Giorgos Athineou <athineou@ics.forth.gr>
+Description: Feature selection methods for identifying minimal, statistically-equivalent and equally-predictive feature subsets. MXM stands for "Mens eX  Machina", meaning "Mind from the Machine" in Latin.
+License: GPL-2
+Suggests: gRbase, Biobase, hash
+Imports: methods, stats, utils, survival, MASS, TunePareto, ROCR,
+        Hmisc, graphics, ordinal, nnet, betareg, lmtest, quantreg,
+        pcalg
+NeedsCompilation: yes
+Packaged: 2015-09-29 09:11:17 UTC; Athinaiou
+Repository: CRAN
+Date/Publication: 2015-09-29 17:33:05
