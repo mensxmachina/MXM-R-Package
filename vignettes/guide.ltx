@@ -1,0 +1,245 @@
+\documentclass[a4paper,11pt]{article}
+
+%\VignetteIndexEntry{A very brief guide to using MXM}
+%\VignetteEngine{R.rsp::tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% declarations for jss.cls %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amsmath}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{epstopdf}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage[left=0.9in, right=0.9in, top=1in, bottom=1in, includefoot, headheight=13pt]{geometry}
+\linespread{1.2}
+
+
+\begin{document}
+
+\begin{center}
+\Large{A very brief guide to using MXM}
+\end{center}
+
+\vskip 1cm
+
+\begin{center}
+\Large{Michail Tsagris, Vincenzo Lagani, Ioannis Tsamardinos}
+\end{center}
+
+
+\section{Introduction}
+MXM is an R package which contains functions for \textbf{feature selection}, \textbf{cross-validation} and \textbf{Bayesian Networks}. The main functionalities focus on feature selection 
+for different types of data. We highlight the option for parallel computing and the fact that some of the functions have been either partially or fully implemented in C++. As for the other 
+ones, we always try to make them faster. 
+
+\section{Feature selection related functions}
+MXM offers many feature selection algorithms, namely MMPC, SES, MMMB, FBED, forward and backward regression. The target set of variables to be selected, ideally what we want to discover, 
+is called Markov Blanket and it consists of the parents, children and parents of children (spouses) of the variable of interest assuming a Bayesian Network for all variables. 
+
+MMPC stands for Max-Min Parents and Children. The idea is to use the Max-Min heuristic when choosing variables to put in the selected variables set and proceed in this way. Parents and 
+Children comes from the fact that the algorithm will identify the parents and children of the variable of interest assuming a Bayesian Network. What it will not recover is the spouses of 
+the children of the variable of interest. For more information the reader is addressed to \citep{Tsamardinos2006a}.
+
+MMMB (Max-Min Markov Blanket) extends the MMPC to discovering the spouses of the variable of interest \citep{Tsamardinos2003b}. SES (Statistically Equivalent Signatures) on the other hand 
+extends MMPC to discovering statistically equivalent sets of the selected variables \citep{Tsamardinos2012, Lagani2017}. Forward and Backward selection are the two classical procedures. 
+
+The functionalities or the flexibility offered by all these algorithms is their ability to handle many types of dependent variables, such as continuous, survival, categorical 
+(ordinal, nominal, binary), longitudinal. Let us now see all of them one by one. The relevant functions are 
+
+\begin{enumerate}
+\item \textbf{MMPC and SES}. SES uses MMPC to return multiple statistically equivalent sets of variables. MMPC returns only one set of variables. In all cases, the log-likelihood ratio 
+test is used to assess the significance of a variable. These algorithms accept categorical only, continuous only or mixed data in the predictor variables side. 
+\item \textbf{wald.mmpc and wald.ses}. SES uses MMPC using the Wald test. These two algorithms accept continuous predictor variables only.
+\item \textbf{perm.mmpc and perm.ses}. SES uses MMPC where the p-value is obtained using permutations. 
+Similarly to the Wald versions, these two algorithms accept continuous predictor variables only.
+\item \textbf{ma.mmpc and ma.ses}. MMPC and SES for multiple datasets measuring the same variables (dependent and predictors).
+\item \textbf{MMPC.temporal and SES.temporal}. Both of these algorithms are the usual SES and MMPC modified for correlated data, such as clustered or longitudinal. The predictor 
+variables can only be continuous. 
+\item \textbf{fbed.reg}. The FBED feature selection method \citep{borboudakis2017}. The log-likelihood ratio test or the eBIC (BIC is a special case) can be used. 
+\item \textbf{fbed.glmm.reg}. FBED with generalised linear mixed models for repeated measures or clustered data.
+\item \textbf{fbed.ge.reg}. FBED with GEE for repeated measures or clustered data.
+\item \textbf{ebic.bsreg}. Backward selection method using the eBIC. 
+\item \textbf{fs.reg}. Forward regression method for all types of predictor variables and for most of the available tests below.  
+\item \textbf{glm.fsreg} Forward regression method for logistic and Poisson regression in specific. The user can call this directly if he knows his data. 
+\item \textbf{lm.fsreg}. Forward regression method for normal linear regression. The user can call this directly if he knows his data. 
+\item \textbf{bic.fsreg}. Forward regression using BIC only to add a new variable. No statistical test is performed. 
+\item \textbf{bic.glm.fsreg}. The same as before but for linear, logistic and Poisson regression (GLMs). 
+\item \textbf{bs.reg}. Backward regression method for all types of predictor variables and for most of the available tests below.
+\item \textbf{glm.bsreg}. Backward regression method for linear, logistic and Poisson regression (GLMs).
+\item \textbf{iamb}. The IAMB algorithm \cite{tsamardinos2003a} which stands for Incremental Association Markov Blanket. The algorithm performs a forward regression at first, followed 
+by a backward regression offering two options. Either the usual backward regression is performed or a faster variation, but perhaps less correct variation. In the usual backward 
+regression, at every step the least significant variable is removed. In the IAMB original version all non significant variables are removed at every step. 
+\item \textbf{mmmb}. This algorithm works for continuous or categorical data only. After applying the MMPC algorithm one can go to the selected variables and perform MMPC on each of them. 
+\end{enumerate}
+
+A list with the available options for this argument is given below. Make sure you include the test name within "" when you supply it. Most of these tests come in their Wald and perm 
+(permutation based) versions. In their Wald or perm versions, they may have slightly different acronyms, for example \textbf{waldBinary} or \textbf{WaldOrdinal} denote the logistic and 
+ordinal regression respectively. 
+
+\begin{enumerate}
+\item \textbf{testIndFisher}. This is a standard test of independence when both the target and the set of predictor variables are continuous (continuous-continuous). 
+   
+\item \textbf{testIndSpearman}. This is a non-parametric alternative to \textbf{testIndFisher} test \citep{fieller1961}. 
+    
+\item \textbf{testIndReg}. In the case of target-predictors being continuous-mixed or continuous-categorical, the suggested test is via the standard linear regression. If the robust option 
+is selected, M estimators \citep{maronna2006} are used. If the target variable consists of proportions or percentages (within the (0, 1) interval), the logit transformation is applied beforehand.
+    
+\item \textbf{testIndRQ}. Another robust alternative to \textbf{testIndReg} for the case of continuous-mixed (or continuous-continuous) variables is the \textbf{testIndRQ}. If the target 
+variable consists of proportions or percentages (within the (0, 1) interval), the logit transformation is applied beforehand.
+
+\item \textbf{testIndBeta}. When the target is proportion (or percentage, i.e., between 0 and 1, not inclusive) the user can fit a regression model assuming a beta distribution 
+\citep{ferrari2004}. The predictor variables can be either continuous, categorical or mixed. 
+
+\item \textbf{testIndPois}. When the target is discrete, and in specific count data, the default test is via the Poisson regression. The predictor variables can be either continuous, 
+categorical or mixed. 
+    
+\item \textbf{testIndNB}. As an alternative to the Poisson regression, we have included the Negative binomial regression to capture cases of overdispersion \citep{hilbe2011}. 
+The predictor variables can be either continuous, categorical or mixed. 
+
+\item \textbf{testIndZIP}. When the number of zeros is more than expected under a Poisson model, the zero inflated poisson regression is to be employed \citep{lambert1992}. 
+The predictor variables can be either continuous, categorical or mixed. 
+    
+\item \textbf{testIndLogistic}. When the target is categorical with only two outcomes, success or failure for example, then a binary logistic regression is to be used. 
+Whether regression or classification is the task of interest, this method is applicable. The advantage of this over a linear or quadratic discriminant analysis is that it 
+allows for categorical predictor variables as well and for mixed types of predictors.
+    
+\item \textbf{testIndMultinom}. If the target has more than two outcomes, but it is of nominal type (political party, nationality, preferred basketball team), there is no 
+ordering of the outcomes, multinomial logistic regression will be employed. Again, this regression is suitable for classification purposes as well and it to allows for categorical
+predictor variables. The predictor variables can be either continuous, categorical or mixed. 
+    
+\item \textbf{testIndOrdinal}. This is a special case of multinomial regression, in which case the outcomes have an ordering, such as \textbf{not satisfied}, \textbf{neutral}, 
+\textbf{satisfied}. The appropriate method is ordinal logistic regression. The predictor variables can be either continuous, categorical or mixed. 
+\item \textbf{testIndTobit} (Tobit regression for left censored data). Suppose you have measurements for which 
+values below some value were not recorded. These are left censored values and by using a normal distribution we can by pass this difficulty. The predictor variables can be 
+either continuous, categorical or mixed. 
+    
+\item \textbf{testIndBinom}. When the target variable is a matrix of two columns, where the first one is the number of successes and the second one is the number of trials, 
+binomial regression is to be used. The predictor variables can be either continuous, categorical or mixed. 
+      
+\item \textbf{gSquare}. If all variables, both the target and predictors are categorical the default test is the $G^2$ test of independence. An alternative to the \textbf{gSquare} 
+test is the \textbf{testIndLogistic}. With the latter, depending on the nature of the target, binary, un-ordered multinomial or ordered multinomial the appropriate regression model 
+is fitted. The predictor variables can be either continuous, categorical or mixed. 
+
+\item \textbf{censIndCR}. For the case of time-to-event data, a Cox regression model \citep{cox1972} is employed. The predictor variables can be either continuous, categorical or mixed.   
+    
+\item \textbf{censIndWR}. A second model for the case of time-to-event data, a Weibull regression model is employed \citep{smith1991, scholz1996}. Unlike the semi-parametric Cox model, 
+the Weibull model is fully parametric. The predictor variables can be either continuous, categorical or mixed. 
+
+\item \textbf{censIndER}. A third model for the case of time-to-event data, an exponential regression model is employed. The predictor variables can be either continuous, categorical 
+or mixed. This is a special case of the Weibull model.
+
+\item \textbf{testIndIGreg}. When you have non negative data, i.e. the target variable takes positive values (including 0), a suggested regression is based on the the inverse 
+Gaussian distribution. The link function is not the inverse of the square root as expected, but the logarithm. This is to ensure that the fitted values will be always be non negative. 
+An alternative model is the Weibull regression (\textbf{censIndWR}). The predictor variables can be either continuous, categorical or mixed. 
+
+\item \textbf{testIndGamma} (Gamma regression). Gamma distribution is designed for strictly positive data (greater than zero). It is used in reliability analysis, as an alternative 
+to the Weibull regression. This test however does not accept censored data, just the usual numeric data. The predictor variables can be either continuous, categorical or mixed. 
+
+\item \textbf{testIndNormLog} (Gaussian regression with a log link). Gaussian regression using the log link (instead of the identity) allows non negative data to be handled naturally. 
+Unlike the gamma or the inverse gaussian regression zeros are allowed. The predictor variables can be either continuous, categorical or mixed.  
+
+\item \textbf{testIndClogit}. When the data come from a case-control study, the suitable test is via conditional logistic regression \citep{gail1981}.  The predictor variables can 
+be either continuous, categorical or mixed. 
+
+\item \textbf{testIndMVReg}. In the case of multivariate continuous target, the suggested test is via a multivariate linear regression. The target variable can be compositional data 
+as well \citep{aitchison1986}. These are positive data, whose vectors sum to 1. They can sum to any constant, as long as it the same, but for convenience reasons we assume that they 
+are normalised to sum to 1. In this case the additive log-ratio transformation (multivariate logit transformation) is applied beforehand.  The predictor variables can be either 
+continuous, categorical or mixed. 
+
+\item \textbf{testIndGLMMReg}. In the case of a longitudinal or clustered target (continuous, proportions within 0 and 1 (not inclusive) ), the suggested test is via a (generalised) 
+linear mixed model \citep{pinheiro2006}.  The predictor variables can only be continuous. This test is only applicable in SES.temporal and MMPC.temporal.   
+
+\item \textbf{testIndGLMMPois}. In the case of a longitudinal or clustered target (counts), the suggested test is via a (generalised) linear mixed model \citep{pinheiro2006}. 
+The predictor variables can only be continuous. This test is only applicable in SES.temporal and MMPC.temporal.   
+
+\item \textbf{testIndGLMMLogistic}. In the case of a longitudinal or clustered target (binary), the suggested test is via a (generalised) linear mixed model \citep{pinheiro2006}. 
+The predictor variables can only be continuous. This test is only applicable in SES.temporal and MMPC.temporal.   
+
+\end{enumerate}
+
+To avoid any mistakes or wrongly selected test by the algorithms you are advised to select the test you want to use. All of these tests can be used with SES and MMPC, forward and 
+backward regression methods. MMMB accepts only \textbf{testIndFisher}, \textbf{testIndSpearman} and \textbf{gSquare}. The reason for this is that MMMB was designed for variables 
+(dependent and predictors) of the same type. For more info the user should see the help page of each function. 
+
+\subsection{A more detailed look at some arguments of the feature selection algorithms}
+SES, MMPC, MMMB, forward and backward regression offer the option for robust tests (the argument \textit{robust}). This is currently supported for the case of Pearson correlation 
+coefficient and linear regression at the moment. We plan to extend this option to binary logistic and Poisson regression as well. These algorithms have an argument \textit{user\_test}. 
+In the case that the user wants to use his own test, for example, \textit{mytest}, he can supply it in this argument as is, without "". For all previously mentioned regression based 
+conditional independence tests, the argument works as \textit{test="testIndFisher"}. In the case of the \textit{user\_test} it works as \textit{user\_test=mytest}. The 
+\textit{max\_k} argument must always be at least 1 for SES, MMPC and MMMB, otherwise it is a simple filtering of the variables. The argument \textit{ncores} offers the option 
+for parallel implementation of the first step of the algorithms. The filtering step, where the significance of each predictor is assessed. If you have a few thousands of variables, 
+maybe this option will do no significant improvement. But, if you have more and a "difficult" regression test, such as quantile regression (\textbf{testIndRQ}), then with 4 cores 
+this could reduce the computational time of the first step up to nearly 50\%. For the Poisson, logistic and normal linear regression we have included C++ codes to speed up this process, 
+without the use of parallel. 
+
+The FBED (Forward Backward Early Dropping) is a variant of the Forward selection is performed in the first phase followed by the usual backward regression. In some, the variation 
+is that every non significant variable is dropped until no mre significant variables are found or there is no variable left. 
+
+The forward and backward regression methods have a few different arguments.For example \textit{stopping} which can be either "BIC" or "adjrsq", with the latter being used only in the 
+linear regression case. Every time a variable is significant it is added in the selected variables set. But, it may be the case, that it is actually not necessary and for this reason 
+we also calculate the BIC of the relevant model at each step. If the difference BIC is less than the \textit{tol} (argument) threshold value the variable does not enter the set 
+and the algorithm stops. 
+
+The forward and backward regression methods can proceed via the BIC as well. At every step of the algorithm, the BIC of the relevant model is calculated and if the BIC of the model 
+including a candidate variable is reduced by more that the \textit{tol} (argument) threshold value that variable is added. Otherwise the variable is not included and the algorithm stops. 
+
+\subsection{Other relevant functions}
+Once SES or MMPC are finished, the user might want to see the model produced. For this reason the functions \textbf{ses.model} and \textbf{mmpc.model} can be used. If the 
+user wants to get some summarised results with MMPC for many combinations of \textit{max\_k} and \textit{treshold} values he can use the \textbf{mmpc.path} function. Ridge 
+regression (\textbf{ridge.reg} and \textbf{ridge.cv}) have been implemented. Note that ridge regression is currently offered only for linear regression with continuous predictor 
+variables. As for some miscellaneous, we have implemented the zero inflated Poisson and beta regression models, should the user want to use them. 
+
+\subsection{Cross-validation}
+\textbf{cv.ses} and \textbf{cv.mmpc} perform a K-fold cross validation for most of the aforementioned regression models. There are many metric functions to be used, 
+appropriate for each case. The folds can be generated in a stratified fashion when the dependent variable is categorical. 
+
+\section{Networks}
+Currently three algorithms for constructing Bayesian Networks (or their skeleton) are offered, plus modifications. 
+\begin{itemize}
+\item MMHC (Max-Min Hill-Climbing) \citep{Tsamardinos2006a}, (\textbf{mmhc.skel}) which constructs the skeleton of the Bayesian Network (BN). This has the option of running SES 
+\citep{Tsamardinos2012} instead.
+\item MMHC (Max-Min Hill-Climbing) \citep{Tsamardinos2006a}, (\textbf{local.mmhc.skel}) which constructs the skeleton around a selected node. It identifies the Parents and 
+Children of that node and then finds their Parents and Children. 
+\item MMPC followed by the PC rules. This is the command \textbf{mmpc.or}. 
+\item PC algorithm \citep{Spirtes2001} (\textbf{pc.skel} for which the orientation rules (\textbf{pc.or}) have been implemented as well. Both of these algorithms accept 
+continuous only, categorical data only or a mix of continuous, multinomial and ordinal. 
+The skeleton of the PC algorithm has the option for permutation based conditional independence tests \citep{Tsamardinos2010}. 
+\item The functions \textbf{ci.mm} and \textbf{ci.fast} perform a symmetric test with mixed data (continuous, ordinal and binary data) \citep{tsagris2017}. This is employed 
+by the PC algorithm as well.
+\item Bootstrap of the PC algorithm to estimate the confidence of the edges (\textbf{pc.skel.boot}).
+\item PC skeleton with repeated measures (\textbf{glmm.pc.skel}). This uses the symetric test proposed by \cite{tsagris2017} with generalised linear models.
+\item Skeleton of a network with continuous data using forward selection. The command \textbf{corfs.network} does a similar to MMHC task. It goes to every variable and instead 
+applying the MMPC algorithm  it applies the forward selection regression. All data must be continuous, since the Pearson correlation is used. The algorithm is fast, since the 
+forward regression with the Pearson correlation is very fast. 
+\end{itemize}
+
+We also have utility functions, such as
+\begin{enumerate}
+\item \textbf{rdag} and \textbf{rdag2}. Data simulation assuming a BN \citep{colombo2014}. 
+\item \textbf{findDescendants} and \textbf{findAncestors}. Descendants and ancestors of a node (variable) in a given Bayesian Network.
+\item \textbf{dag2eg}. Transforming a DAG into an essential (mixed) graph, its class of equivalent DAGs.
+\item \textbf{equivdags}. Checking whether two DAGs are equivalent.
+\item \textbf{is.dag}. In fact this checks whether cycles are present by trying to topologically sort the edges. BNs do not allow for cycles.
+\item \textbf{mb}. The Markov Blanket of a node (variable) given a Bayesian Network.
+\item \textbf{nei}. The neighbours of a node (variable) given an undirected graph.
+\item \textbf{undir.path}. All paths between two nodes in an undirected graph. 
+\item \textbf{transitiveClosure}. The transitive closure of an adjacency matrix, with and without arrowheads.
+\item \textbf{bn.skel.utils}. Estimation of false discovery rate \citep{tsamardinos2008}, plus AUC and ROC curves based on the p-values. 
+\item \textbf{bn.skel.utils2}. Estimation of the confidence of the edges \citep{triantafillou2014}, plus AUC and ROC curves based on the confidences. 
+\item \textbf{plotnetwork}. Interactive plot of a graph.
+\end{enumerate}
+
+\section{Acknowledgments}
+The research leading to these results has received funding from the European Research Council under the 
+European Union's Seventh Framework Programme (FP/2007-2013) / ERC Grant Agreement n. 617393.
+
+
+\bibliographystyle{apa}             
+\bibliography{biblio}
+
+
+\end{document}
+

@@ -1,0 +1,628 @@
+---
+title: "Tutorial: Feature selection with the SES algorithm"
+author:
+- name: Kleio - Maria Verrou
+  affiliation:
+  - Medicine Department, University of Crete, Greece
+  - Mens ex Machina Group, Computer Science Department, University of Crete, Greece
+
+- name: Michail Tsagris
+  affiliation: Mens ex Machina Group, Computer Science Department, University of Crete, Greece
+  email: mtsagris@uoc.gr
+date: "`r Sys.Date()`"
+output:
+  BiocStyle::html_document:
+    toc_float: true
+  BiocStyle::pdf_document: default
+
+vignette: |
+  %\VignetteIndexEntry{Tutorial: Feature selection with the SES algorithm}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+<br>
+<br>
+<img src = 'http://bit.ly/mxm_ses_png' width="500" height="1000" align="middle" />
+<br>
+<br>
+  
+
+# Introduction
+
+
+The MXM R Package, short for the latin 'Mens ex Machina' ( Mind from the Machine ), is a collection of utility functions for feature selection, cross validation and Bayesian Networks. MXM offers many feature selection algorithms focused on providing one or more minimal feature subsets, refered also as variable signatures, that can be used to improve the performance of downstream analysis tasks such as regression and classification, by excluding irrelevant and redundant variables.
+In this tutorial we will learn how to use the SES algorithm. For simplicity, we will use a dataset referred as **"The Wine Dataset"**. 
+
+# Loading Data
+**The Wine Dataset** contains the results of a chemical analysis of wines grown in a specific area of Italy. Three types of wine are represented in the 178 samples, with the results of 13 chemical analyses recorded for each sample. Note that the "Type" variable was transformed into a categorical variable.
+  
+  
+So, first of all, for this tutorial analysis, we are loading the 'MXM' library and 'dplyr' library for handling easier the dataset. 
+  
+```{r, warning =  FALSE, message = FALSE }
+
+### ~ ~ ~ Load Packages ~ ~ ~ ###
+library(MXM) 
+library(dplyr)
+```
+  
+And on a next step we are downloading and opening the dataset, defining also the column names.
+  
+```{r}
+
+### ~ ~ ~ Load The Dataset ~ ~ ~ ###
+wine.url <- "ftp://ftp.ics.uci.edu/pub/machine-learning-databases/wine/wine.data"
+wine <- read.csv(wine.url,
+                 check.names = FALSE,
+                 header = FALSE) 
+head(wine)
+str(wine)
+colnames(wine) <- c('Type', 'Alcohol', 'Malic', 'Ash', 
+                    'Alcalinity', 'Magnesium', 'Phenols', 
+                    'Flavanoids', 'Nonflavanoids',
+                    'Proanthocyanins', 'Color', 'Hue', 
+                    'Dilution', 'Proline')
+```
+  
+
+# SES for Continuous
+   
+For this tutorial example, we are going to apply the SES algorithm on the above dataset, using as data and as target variables only continuous variables.   
+
+  
+##  Running SES for 1st time
+
+   
+### Selecting Appropriate Conditional Independence Test   
+   
+   
+The selection of the appropriate conditional independence test is a crucial decision for the validity and success of downstream statistical analysis and machine learning tasks. Currently the __ ` MXM R package`__  supports numerous tests for different combinations of __target__ ( _dependent_ ) and __predictor__ ( _independent_ ) variables. A detailed summary table to guide you through the selection of the most suitable test can be found in __MXM's__ reference manual (p.21 _"CondInditional independence tests"_ ) here: <https://CRAN.R-project.org/package=MXM>. 
+In our example we will use the __`MXMX::SES()`__, which is the implementation of the SES algorithm and since we are going to examine only continuous variables, we will use the Fisher's Independence Test.
+   
+   
+### Creating Data & Target Matrices
+  
+  
+`dataset` - A numeric matrix ( or a _data.frame_ in case of categorical predictors), 
+containing the variables for performing the test. The rows should refer to the different samples and columns to the features. For the purposes of this example analysis, we are going to use only the continuous variables, therefore we are removing the "Type" variable from the dataset. Furthermore, we are removing the "Nonflavanoids" variable, because we will use it as target.
+  
+  
+```{r}
+### ~ ~ ~ Removing The Categorical ('Type') and The Target ('Nonflavanoids') Variables ~ ~ ~ ###
+
+wine_dataset <- dplyr::select(wine,
+                              -contains("Type"),
+                              -contains("Nonflavanoids")) 
+head(wine_dataset)
+```
+  
+  
+`target` -  The class variable including the values of the target variable. We should provide either a string, an integer, a numeric value, a vector, a factor, an ordered factor or a Surv object.
+For the purposes of this example analysis, we are going to use as the dependent variable Nonflavanoids. 
+
+```{r}
+wine_target <- wine$Nonflavanoids
+head(wine_target)
+```
+
+
+###  Function's Arguments
+   
+This is the first time that we are running the algorithm, so we are going to explain what each **Argument** refers to:
+  
+`target` : The class variable. Provide either a string, an integer, a numeric value, a vector, a factor, an ordered factor or a Surv object. As explained above, this will be the dependent variable. If the target is a single integer value or a string, it has to corresponds to the column number or to the name of the target feature in the dataset. *Here* we choose wine$Nonflavanoids
+  
+`dataset` : The dataset. Provide either a data frame or a matrix. If the dataset (predictor variables) contains missing (NA) values, they will automatically be replaced by the current variable (column) mean value with an appropriate warning to the user after the execution. *Here* we choose the whole wine dataset, except from the Type (categorical) and Nonflavanoids (target) variables.
+  
+`max_k` : The maximum conditioning set to use in the conditional independence test (see The Rule of Thumb in **TIPS** session). Integer, default value is 3.*Here* we choose the default value 3.
+  
+`threshold` : Threshold (suitable values in [0,1]) for assessing p-values significance. Default value is 0.05. *Here* we choose the default value (0.05)
+  
+`test` : The conditional independence test to use. Default value is NULL. *Here* since our dataset includes only continuous features (*remember*: Categorical variable 'Type' was removed) and our dependent variable is also continuous, we choose 'testIndFisher'.
+  
+For more information, about which test to use, please visit :  <https://www.rdocumentation.org/packages/MXM/versions/0.9.7/topics/CondInditional%20independence%20tests>. 
+  
+`ini` : After running SES with some hyper-parameters you might want to run SES again with different hyper-parameters. To avoid calculating the univariate associations (first step of SES) again, you can extract them from the first run of SES and plug them here. This can speed up the second run (and subsequent runs of course) by 50%. *Here*, since we are going to apply the analysis for the first time, we place the argument being equal to **NULL**.
+
+`wei` : A vector of weights to be used for weighted regression. The default value is NULL. It is not taken into account when robust is set to TRUE. *Here* we are not going to use weights.
+  
+`user_test` : A user-defined conditional independence test (provide a closure type object). Default value is NULL. If this is defined, the "test" argument is ignored. *Here* we have not created a different conditional independence test. We are going to use the 'testIndFisher', as explained in the `test` argument.
+  
+`hash` : A boolean variable which indicates whether (TRUE) or not (FALSE) to store the statistics calculated during SES execution in a hash-type object. Default value is FALSE. If TRUE a hashObject is produced. In this example, this is the first time that we are running the algorithm and our goal is to apply also a second one. *Here* mind that we are setting `hash` = **TRUE**, because we want that the univariate associations to be kept for next usage.
+  
+`hashObject` : A List with the hash objects generated in a previous run of SES. Each time SES runs with "hash=TRUE" it produces a list of hashObjects that can be re-used in order to speed up next runs of SES or MMPC. *Here*, since this is the first time that we run the analysis, we are not providing a hashObject.
+  
+`ncores` :  How many cores to use. For more details, see the **TIPS** session. *Here*, since we have a small number of samples and features, we are using only one core.
+  
+  
+```{r}
+### ~ ~ ~ Running SES For First Time ~ ~ ~ ###
+ses_default_1st <- MXM::SES(target = wine_target,
+                          dataset   = wine_dataset, 
+                          max_k      = 3, 
+                          threshold  = 0.05, 
+                          test       = "testIndFisher",
+                          ini        = NULL, 
+                          wei        = NULL,
+                          user_test  = NULL, 
+                          hash       = TRUE, 
+                          hashObject = NULL, 
+                          ncores     = 1)
+```
+  
+    
+So, the algorithm run...
+Let's see what information we can take out of it.  
+    
+    
+### Output
+  
+  
+The main purpose of running SES algorithm is to see which variables should be selected as important. The indices of those variables are stored in `selectedVars`.  
+  
+```{r}
+ses_default_1st@selectedVars
+SelectedVars_names<-colnames(wine_dataset[ses_default_1st@selectedVars])
+SelectedVars_names
+```
+  
+Here, we see which are the important features.
+  
+But can we have them in an order, according to increasing p-value?
+  
+Yes, of course!  
+  
+```{r}
+SelectedVars_indecies_Ordered<- ses_default_1st@selectedVarsOrder
+SelectedVars_indecies_Ordered
+```
+  
+And what are the equivalent signatures?
+  
+```{r}
+ses_default_1st@signatures
+```  
+  
+  
+But what is the difference of signatures and this:
+```{r}
+ses_default_1st@queues
+```
+  
+Well, queues is a list containing a list (queue) of equivalent features for each variable included in selectedVars. An equivalent signature can be built by selecting one and only one feature from each queue. In our case there are no equivalent signatures, hence all variables have no equivalent variable.  
+  
+What about the statistics corresponding to "p-values"? (Remember: higher values indicates higher association)
+  
+```{r}
+ses_default_1st@stats  
+```
+  
+But what is the difference between @stats and @pvalues?
+```{r}
+ses_default_1st@pvalues
+```
+  
+Both lists are almost the same, however, in @pvalues, for each feature included in the dataset, this vector reports the strength of its association with the target in the context of all other variables. Particularly, this vector reports the max p-values found when the association of each variable with the target is tested against different conditional sets. Lower values indicate higher association.
+  
+And are all hyper-parameters that were used for the algorithm also stored in this Object?  
+  
+```{r}
+ses_default_1st@max_k     # max_k option used in the current run
+ses_default_1st@threshold # threshold option used in the current run
+ses_default_1st@test      # character name of the statistic test used
+```  
+  
+Ok! All this is perfect, but can we see the number of univariate associations?
+
+```{r}
+ses_default_1st@n.tests 
+```
+
+**Attention** : If you have set `hash = TRUE` (as we did), then the number of tests performed by SES will be returned. So actually here we are seeing the number of tests performed.
+  
+Ok, but in the beginning we said that if we enable `hash`, then the univariate associations are also stored. How can we get them?
+  
+```{r}
+ses_default_1st@univ
+```
+  
+  
+And how quick has all this happened? 
+  
+```{r}
+ses_default_1st@runtime 
+```  
+  
+  
+## Running SES 2nd time
+  
+  
+As mentioned before, we want to apply the analysis more than once. So, let's say that the goal is to apply the same analysis, but with a different threshold (0.1 instead of 0.05) and with a different max_k (4 instead of 3).
+Remember that during the first run, we kept `hash = TRUE`, therefore the information is stored in the created variable. `ini`  is a supposed to be a list. After running SES (or MMPC) with some hyper-parameters you might want to run SES again with different hyper-parameters. To avoid calculating the univariate associations (first step of SES) again, you can extract them from the first run of SES and plug them here. This can speed up the second run (and subsequent runs of course) by 50%. 
+
+In addition, supplying the hashObject also saves computational time as no extra tests will be performed.
+
+```{r}
+### ~ ~ ~ Running SES For First Time ~ ~ ~ ###
+ses_default_2nd <- MXM::SES(target = wine_target,
+                          dataset   = wine_dataset, 
+                          max_k      = 4, 
+                          threshold  = 0.1, 
+                          test       = "testIndFisher",
+                          ini        = ses_default_1st@univ, 
+                          wei        = NULL,
+                          user_test  = NULL, 
+                          hash       = TRUE, 
+                          hashObject = ses_default_1st@hashObject, 
+                          ncores     = 1)
+```  
+    
+    
+## Creating the model
+  
+This is how we can create the Model including the significant variables. One or more regression models obtained from SES are returned.
+  
+```{r}
+### ~ ~ ~ glm() Model Estimates Using SES Feature Subset As Predictor Variables ~ ~ ~ ###
+
+first_sign_ses<- ses.model(target = wine_target, 
+                             dataset = as.matrix(wine_dataset),
+                             wei = NULL, 
+                             sesObject = ses_default_1st, # 
+                             test = 'testIndFisher')
+
+```
+  
+The model(s) created is/are stored in the $mod$ variable. We can get the summary of the model (looks like the summary of many other linear models), or ask for the signatures ( $signature$ ). The BIC score is also returned for each value of the signature. 
+  
+```{r}
+
+ses_model_summary <- first_sign_ses$mod
+signature          <- first_sign_ses$signature
+signature
+
+```
+  
+
+# SES for Categorical 
+  
+On the example above, we run the analysis for a continuous variable (Nonflavanoids). What would happen if we choose to use as target the "Type" variable, which is the categorical variable referring to the three types of wine that are represented?
+
+## Running SES for Categorical 
+  
+  
+### Selecting Appropriate Conditional Independence Test
+  
+Since the variable is categorical - and more specific it is a factor with more than two levels (unordered) -and the features are continuous, according to __MXM's__ reference manual (p.21 _"CondInditional independence tests"_ ) here: <https://CRAN.R-project.org/package=MXM>, we should use the Multinomial logistic regression ( 'testIndMultinom' ).
+  
+### Creating Data & Target Matrices
+  
+In this step, we keep the whole dataset, in order to show how to use the algorithm also without subtracting the initial matrix.
+
+```{r}
+### ~ ~ ~ Taking The Whole Dataset ~ ~ ~ ###
+
+wine_dataset <- wine
+head(wine_dataset)
+```  
+  
+We will not create a different matrix for the target. As mentioned above, we are going to use the Type variable, but please... be patient...
+  
+### Setting the Arguments 
+  
+```{r, message=FALSE}
+### ~ ~ ~ Running SES For Categorical Variable ~ ~ ~ ###
+wine[, 1] <- as.factor(wine[, 1])
+ses_default_1st <- MXM::SES(target = 1, ## Defining as target the 1st column
+                          dataset   = wine, 
+                          max_k      = 3, 
+                          threshold  = 0.05, 
+                          test       = "testIndMultinom",
+                          ini        = NULL, 
+                          wei        = NULL,
+                          user_test  = NULL, 
+                          hash       = TRUE, 
+                          hashObject = NULL, 
+                          ncores     = 1)
+```  
+  
+So, the algorithm run once again...
+Let's see what information we can take out of it.
+  
+### Output
+  
+The main purpose of running SES algorithm is to see which variables should be selected as  important. The indices of those variables are stored in `selectedVars`.
+
+```{r}
+ses_default_1st@selectedVars
+SelectedVars_names<-colnames(wine_dataset[ses_default_1st@selectedVars])
+SelectedVars_names
+```  
+  
+We could again ask for each variable of the output, as in the first implementation of the algorithm. But we will concentrate on the returned signature.  
+  
+```{r}
+SelectedVars_indecies_Ordered<- ses_default_1st@selectedVarsOrder
+SelectedVars_indecies_Ordered
+```
+  
+And what are the equivalent signatures?
+
+```{r}
+ses_default_1st@signatures
+```  
+  
+And how quick has all this happened? 
+
+```{r}
+ses_default_1st@runtime 
+```
+  
+  
+## Creating the model
+  
+  
+This is how we can create the Model including the significant variables. One or more regression models obtained from SES are returned.
+
+```{r}
+### ~ ~ ~ glm() Model Estimates Using SES Feature Subset As Predictor Variables ~ ~ ~ ###
+
+second_sign_ses<- ses.model(target = as.matrix(wine_target), 
+                             dataset = as.matrix(wine_dataset),
+                             wei = NULL, 
+                             sesObject = ses_default_2nd, # 
+                             test = 'testIndFisher')
+
+```
+
+The model(s) created is/are stored in the $mod$ variable. We can get the summary of the model (looks like the summary of many other linear models), or ask for the signatures ( $signature$ ). The BIC score is also returned for each value of the signature. 
+
+```{r}
+
+ses_model_summary <- second_sign_ses$mod
+signature          <- second_sign_ses$signature
+signature
+
+```
+
+```{r}
+str(signature)
+```  
+  
+  
+# Permutation Based SES
+   
+If the analysis has to be done using permutations (when few observations are available), then this could be applied like this:
+
+```{r}
+### ~ ~ ~ Permutations ~ ~ ~ ###
+library('MXM')
+permutation_ses_model <- MXM::perm.ses(wine_target,
+                                         wine_dataset,  
+                                         R = 999, # The number of permutations to use. The default value is 999
+                                         max_k      = 3, 
+                                         threshold  = 0.05, 
+                                         test       = NULL, 
+                                         ini        = NULL, 
+                                         wei        = NULL,
+                                         user_test  = NULL, 
+                                         hash       = FALSE, 
+                                         hashObject = NULL, 
+                                         ncores     = 1)
+```
+
+There is a solution to avoid all permutations. As soon as the number of times the permuted test statistic
+is more than the observed test statistic is more than 50 (if threshold = 0.05 and R = 999), the p-value has exceeded the significance level (threshold value) and hence the predictor variable is not significant. There is no need to continue doing the extra permutations, as a decision has already been made.   
+  
+  
+# Cross - Validation 
+  
+  
+Cross-validation (CV) is a technique for validating models which can assess the generalization of the results provided by a statistical analysis on independent datasets. It is a technique widely used in regression and classification approaches and provides a solution to the problem of choosing the right tuning-parameters in a prediction model. In the case of SES algorithm, the tuning parameters would be `max_k` and `threshold`. Therefore, in MXM package, a function named `cv.ses()` can be found. The function performs a k-fold cross-validation for identifying the best values for the SES tuning parameters. In case the user does not know what tuning parameters to use, we suggest the use of this function as Step Zero, before running the algorithm.
+  
+  
+## Creating Data & Target Matrices
+  
+  
+For the purposes of this tutorial, we are going to use the same dataset and as target we will use again the Categorical variable "Type", transforming our problem into a Classification problem by trying to predict the label of the each row, provided by the first column.
+  
+So, let's see how this algorithm works.  
+  
+## Function's Arguments
+  
+Before running the `cv.ses()` function we are going to explain what each **Argument** refers to:  
+  
+`target` : The target or class variable as in SES. The difference is that it cannot accept a single numeric value, an integer indicating the column in the dataset. *Here* we choose wine$Type, which is a Categorical variable.
+  
+`dataset` : The dataset object as in SES. *Here* we choose the whole wine dataset.
+  
+`wei` : A vector of weights to be used for weighted regression.*Here* we choose the default value **NULL**.  
+  
+`kfolds` : The number of the folds in the k-fold Cross Validation (integer). *Here* we choose 5. Since the dataset includes 178 observations, by splitting into 5 folds, each fold will have circa 35 rows.
+  
+`folds` : The folds of the data to use (a list generated by the function generateCVRuns TunePareto). If NULL the folds are created internally with the same function. *Here* we will let the algorithm run alone the internal function, by choosing **NULL**.
+   
+`alphas` : A vector of SES thresholds hyper parameters to be used in CV. *Here* choose the values 0.1, 0.05, 0.01.
+  
+`max_ks` : A vector of SES max_ks hyper parameters to be used in CV. *Here* we choose the values 3, 4, 5. 
+  
+`task` : A character ("C", "R" or "S"). It can be "C" for classification (logistic, multinomial or ordinal regression), "R" for regression (robust and non robust linear regression, median regression, (zero inflated) poisson and negative binomial regression, beta regression), "S" for survival regression (Cox, Weibull or exponential regression). *Here* we choose "C", since we are applying a classification technique on the dataset, by placing as target the "Type" categorical variable.
+  
+`metric` : A metric function provided by the user. If NULL the following functions will be used: auc.mxm, mse.mxm, ci.mxm for classification, regression and survival analysis tasks, respectively. The metric functions that are currently supported are:
+  
+* auc.mxm: "area under the receiver operator characteristic curve" metric, as provided in the package ROCR.
+  
+* acc.mxm: accuracy metric.
+
+* fscore.mxm: F score for binary logistic regression.
+
+* euclid_sens.spec.mxm: Euclidean norm of 1 - sensitivity and 1 - specificity for binary logistic regression.
+
+* acc_multinom.mxm: accuracy or multinomial logistic regression.
+
+* mse.mxm: -1 * (mean squared error), for robust and non robust linear regression and median (quantile) regression.
+
+* ci.mxm: 1 - concordance index as provided in the rcorr.cens function from the Hmisc package. This is to be used with the Cox proportional hazards model only.
+
+* ciwr.mxm concordance index as provided in the rcorr.cens function from the Hmisc package. This is to be used with the Weibull regression model only.
+
+* poisdev.mxm: Poisson regression deviance.
+
+* nbdev.mxm: Negative binomial regression deviance.
+
+* binomdev.mxm: Negative binomial regression deviance.
+
+* ord_mae.mxm: Ordinal regression mean absolute error.
+  
+If you are certain about the meaning of one metric, then we suggest to use this one. *Here* we choose the "accuracy metric for multinomial" (acc_multinom.mxm).  
+  
+`modeler` : A modeling function provided by the user. If NULL the following functions will be used: glm.mxm, lm.mxm, coxph.mxm for classification, regression and survival analysis tasks, respectively. The modelling functions that are currently supported are:
+  
+* glm.mxm: fits a glm for a binomial family (Classification task).
+
+* lm.mxm: fits a linear model model (stats) for the regression task.
+
+* coxph.mxm: fits a cox proportional hazards regression model for the survival task.
+
+* weibreg.mxm: fits a Weibull regression model for the survival task.
+
+* rq.mxm: fits a quantile (median) regression model for the regression task.
+
+* lmrob.mxm: fits a robust linear model model for the regression task.
+
+* pois.mxm: fits a poisson regression model model for the regression task.
+
+* nb.mxm: fits a negative binomial regression model model for the regression task.
+
+* multinom.mxm: fits a multinomial regression model model for the regression task.
+
+* ordinal.mxm: fits an ordinal regression model model for the regression task.
+
+* beta.mxm: fits a beta regression model model for the regression task. 
+
+The predicted values are transformed into R using the logit transformation. This is so that the "mse.mxm" metric function can be used. In addition, this way the performance can be compared with the regression scenario, where the logit is applied and then a regression model is employed.  
+  
+In case you decide not to choose one of the default modelers, we suggest to you to be certain about the way your chosen one works. *Here* we choose multinom.mxm, since we search for a multinomial regression model.  
+  
+`ses_test` : A function object that defines the conditional independence test used in the SES function (see **3.1.1 Selecting Appropriate Conditional Independence Test**). If NULL, "testIndFisher", "testIndLogistic" and "censIndCR" are used for classification, regression and survival analysis tasks, respectively. Not all tests can be included here. "testIndClogit", "testIndMVreg", "testIndIG", "testIndGamma", "testIndZIP" and "testIndTobit" are not available yet.     
+  
+*Here* we choose 'testIndMultinom'', as explained in **4.1.1 Selecting Appropriate Conditional Independence Test**  
+
+  
+`robust` : A boolean variable which indicates whether (TRUE) or not (FALSE) to use a robust version of the statistical test if it is available. It takes more time than a non robust version but it is suggested in case of outliers. *Here*, we set it as **FALSE**.  
+  
+`ncores` :  How many cores to use. For more details, see the **TIPS** session. *Here*, since we have a small number of samples and features, we are using only one core.
+
+  
+  
+```{r, collapse=FALSE} 
+### ~ ~ ~ Cross-Validation ~ ~ ~ ### 
+library('MXM')
+cv_ses_model <- MXM::cv.ses(target   = wine[, 1], # Using the 1st column as target
+                            dataset  = wine[, -1],  
+                            wei      = NULL,
+                            kfolds   = 5, 
+                            folds    = NULL, 
+                            alphas   = c(0.1, 0.05, 0.01), 
+                            max_ks   = c(3, 4, 5), 
+                            task     = "C", 
+                            metric   = acc_multinom.mxm, # Note that we are passing it as a function and not as a character
+                            modeler  = multinom.mxm,  # Note that we are passing it as a function and not as a character
+                            ses_test = "testIndMultinom",
+                            ncores = 1)
+```    
+  
+  
+## Output  
+  
+  
+The main purpose of running Cross - Validation SES algorithm is to see which hyperparameters should be selected for tuning the algorithm. The best configuration (pair of max_k and p-value) is stored under the variable `$best_configuration`.
+
+```{r}
+cv_ses_model$best_configuration
+cv_ses_model$best_performance
+```
+  
+   
+As we see, the id, the significance threshold ("a") and the best max_k are returned. 
+   
+   
+But what if we want to see how good a specific configuration did during the Cross-Validation?  
+Yes yes, we can ask for the performance more specifically.   
+Here we check separately the results for the first configuration.
+  
+  
+```{r}
+cv_ses_model$cv_results_all[[1]]$configuration #this configuration we are examining
+cv_ses_model$cv_results_all[[1]]$performances # those are the performances.
+cv_ses_model$cv_results_all[[1]]$signatures # signatures created by this configuration
+```
+  
+  
+**Note:** By asking the best performance `$best_performance`, we get the mean value of all folds of the best configuration. If we ask for the performances of the best configuration (here it is the first configuration) `$cv_results_all[[1]]$performances` we get all performance values of each fold (here 5). 
+  
+  
+```{r}
+cv_ses_model$best_performance
+index<-cv_ses_model$best_configuration$id
+cv_ses_model$cv_results_all[[index]]$performances
+mean(cv_ses_model$cv_results_all[[index]]$performances)  
+```
+   
+   
+# Tips
+  
+  
+## Choosing k_max
+  
+  
+There is a rule of thumb that we are suggesting. If the sample size is small, take as max_k the smallest integer near N/10, where N is the number of samples. For more details, you may visit <http://bit.ly/stack_ovrflw_max_predictors_in_multi_regression>
+
+```{r}
+#
+N = dim(wine_dataset)[1]
+suggested_max_k = floor(N/10)
+N
+suggested_max_k
+```  
+  
+However, an other approach would be to run the cross-validation function, described above. In that case, the best `max_k` will be returned together with the best `threshold` (see **6. Cross - Validation**)
+  
+## Choosing number of cores
+  
+  
+This those kind of analyses may be applied on very big dataset, the SES algorithm provides the opportunity to be run on more than one cores. We suggest that you use more cores, when the datasets are big, but remember that the best run time will always be dependent on the architecture of the computer that is used.   
+  
+  
+# Conclusion
+  
+  
+>Now you are ready to run your own analysis using MXM::SES algorithm!   
+>Thank you for your attention.    
+>Hope that you found this tutorial helpful.    
+    
+
+
+# Session Info {.unnumbered}  
+All analyses have been applied on:
+
+```{r}
+sessionInfo()
+```
+  
+   
+    
+# References {.unnumbered}
+  
+  
+Lagani, V., Athineou, G., Farcomeni, A., Tsagris, M. & Tsamardinos, I. Feature Selection with the R Package MXM: Discovering Statistically Equivalent Feature Subsets. J. Stat. Softw. 80, 1-25 (2017).  
+
+I. Tsamardinos, V. Lagani and D. Pappas (2012). Discovering multiple, equivalent biomarker signatures. In proceedings of the 7th conference of the Hellenic Society for Computational Biology & Bioinformatics - HSCBB12.  
+
+Tsamardinos, Brown and Aliferis (2006). The max-min hill-climbing Bayesian network structure learning algorithm. Machine learning, 65(1), 31-78.  
+
+Brown, L. E., Tsamardinos, I., & Aliferis, C. F. (2004). A novel algorithm for scalable and accurate Bayesian network learning. Medinfo, 711-715.  
+  
+Tsamardinos, I., Aliferis, C. F., & Statnikov, A. (2003). Time and sample efficient discovery of Markov blankets and direct causal relations. In Proceedings of the ninth ACM SIGKDD international conference on Knowledge discovery and data mining (pp. 673-678). ACM.  

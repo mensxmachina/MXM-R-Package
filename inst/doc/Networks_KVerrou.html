@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Introduction</title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: #990073
+   }
+
+   pre .number {
+     color: #099;
+   }
+
+   pre .comment {
+     color: #998;
+     font-style: italic
+   }
+
+   pre .keyword {
+     color: #900;
+     font-weight: bold
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: #d14;
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<p><br>
+<br>
+<img src = 'https://s22.postimg.cc/rpuduutb5/image.png' width="500" height="1000" align="middle" />
+<br>
+<br> </p>
+
+<h1>Introduction</h1>
+
+<p>The MXM R Package, short for the latin &#39;Mens ex Machina&#39; ( Mind from the Machine ), is a collection of utility functions for feature selection, cross validation and Bayesian Networks. It is well known in the literature that the problem of learning the structure of Bayesian networks is very hard to tackle, because of the computational complexity. MXM offers many Bayesian Network construction algorithms, taking advantage of different heuristics that are described in the published algorithms.</p>
+
+<p>In this tutorial we will learn how to construct the skeleton of a <strong>Bayesian network</strong>. For this task, we are going to use three different algorithms.</p>
+
+<ol>
+<li><p>Max-Min Hill-Climbing (MMHC): The algorithm combines ideas from local learning, constraint-based, and search-and-score techniques in a principled and effective way. It first reconstructs the skeleton of a Bayesian network and then performs a Bayesian-scoring greedy hill-climbing search to orient the edges.(Tsamardinos et al., 2006)</p></li>
+<li><p>PC:  The algorithm is a structure learning/causal discovery algorithm developed at Carnegie Mellon University by Peter Spirtes and Clark Glymour and is implemented in MXM package as proposed by Spirtes et al. (2001). </p></li>
+<li><p>Partial Correlation based on Forward Selection: In this approach, the network construction uses the partial correlation based forward regression. </p></li>
+</ol>
+
+<p>For simplicity, in this tutorial, we will use a dataset referred as <strong>&ldquo;The Wine Dataset&rdquo;</strong>. </p>
+
+<h1>Loading Data</h1>
+
+<p><strong>The Wine Dataset</strong> contains the results of a chemical analysis of wines grown in a specific area of Italy. Three types of wine are represented in the 178 samples, with the results of 13 chemical analyses recorded for each sample. Note that the &ldquo;Type&rdquo; variable was transformed into a categorical variable.</p>
+
+<p>So, first of all, for this tutorial analysis, we are loading the &#39;MXM&#39; library and &#39;dplyr&#39; library for handling easier the dataset, but note that the second one is not necessary for the analysis.  </p>
+
+<pre><code class="r">### ~ ~ ~ Load Packages ~ ~ ~ ###
+library(MXM) 
+library(dplyr)
+</code></pre>
+
+<p>On a next step we are downloading and opening the dataset, defining also the column names.</p>
+
+<pre><code class="r">### ~ ~ ~ Load The Dataset ~ ~ ~ ###
+wine.url &lt;- &quot;ftp://ftp.ics.uci.edu/pub/machine-learning-databases/wine/wine.data&quot;
+wine &lt;- read.csv(wine.url,
+                 check.names = FALSE,
+                 header = FALSE) 
+wine[, 1] &lt;- as.factor(wine[, 1])
+head(wine)
+</code></pre>
+
+<pre><code>##   V1    V2   V3   V4   V5  V6   V7   V8   V9  V10  V11  V12  V13  V14
+## 1  1 14.23 1.71 2.43 15.6 127 2.80 3.06 0.28 2.29 5.64 1.04 3.92 1065
+## 2  1 13.20 1.78 2.14 11.2 100 2.65 2.76 0.26 1.28 4.38 1.05 3.40 1050
+## 3  1 13.16 2.36 2.67 18.6 101 2.80 3.24 0.30 2.81 5.68 1.03 3.17 1185
+## 4  1 14.37 1.95 2.50 16.8 113 3.85 3.49 0.24 2.18 7.80 0.86 3.45 1480
+## 5  1 13.24 2.59 2.87 21.0 118 2.80 2.69 0.39 1.82 4.32 1.04 2.93  735
+## 6  1 14.20 1.76 2.45 15.2 112 3.27 3.39 0.34 1.97 6.75 1.05 2.85 1450
+</code></pre>
+
+<pre><code class="r">str(wine)
+</code></pre>
+
+<pre><code>## &#39;data.frame&#39;:    178 obs. of  14 variables:
+##  $ V1 : Factor w/ 3 levels &quot;1&quot;,&quot;2&quot;,&quot;3&quot;: 1 1 1 1 1 1 1 1 1 1 ...
+##  $ V2 : num  14.2 13.2 13.2 14.4 13.2 ...
+##  $ V3 : num  1.71 1.78 2.36 1.95 2.59 1.76 1.87 2.15 1.64 1.35 ...
+##  $ V4 : num  2.43 2.14 2.67 2.5 2.87 2.45 2.45 2.61 2.17 2.27 ...
+##  $ V5 : num  15.6 11.2 18.6 16.8 21 15.2 14.6 17.6 14 16 ...
+##  $ V6 : int  127 100 101 113 118 112 96 121 97 98 ...
+##  $ V7 : num  2.8 2.65 2.8 3.85 2.8 3.27 2.5 2.6 2.8 2.98 ...
+##  $ V8 : num  3.06 2.76 3.24 3.49 2.69 3.39 2.52 2.51 2.98 3.15 ...
+##  $ V9 : num  0.28 0.26 0.3 0.24 0.39 0.34 0.3 0.31 0.29 0.22 ...
+##  $ V10: num  2.29 1.28 2.81 2.18 1.82 1.97 1.98 1.25 1.98 1.85 ...
+##  $ V11: num  5.64 4.38 5.68 7.8 4.32 6.75 5.25 5.05 5.2 7.22 ...
+##  $ V12: num  1.04 1.05 1.03 0.86 1.04 1.05 1.02 1.06 1.08 1.01 ...
+##  $ V13: num  3.92 3.4 3.17 3.45 2.93 2.85 3.58 3.58 2.85 3.55 ...
+##  $ V14: int  1065 1050 1185 1480 735 1450 1290 1295 1045 1045 ...
+</code></pre>
+
+<pre><code class="r">colnames(wine) &lt;- c(&#39;Type&#39;, &#39;Alcohol&#39;, &#39;Malic&#39;, &#39;Ash&#39;, 
+                    &#39;Alcalinity&#39;, &#39;Magnesium&#39;, &#39;Phenols&#39;, 
+                    &#39;Flavanoids&#39;, &#39;Nonflavanoids&#39;,
+                    &#39;Proanthocyanins&#39;, &#39;Color&#39;, &#39;Hue&#39;, 
+                    &#39;Dilution&#39;, &#39;Proline&#39;)
+</code></pre>
+
+<h1>MMHC</h1>
+
+<p>We are going to use MMHC on the above dataset in order to construct the skeleton of the network. MMHC uses conditional independence test on each variable. 
+Firstly, MMPC runs on every variable. The backward phase (see Tsamardinos et al., 2006) takes place automatically. After all variables have been used, the matrix is checked for inconsistencies which are then corrected.</p>
+
+<p>A trick mentioned in that paper to make the procedure faster is the following. In the k-th variable, the algorithm checks how many previously scanned variables have an edge with the k-th variable and keeps them along with the next (unscanned) variables (variables without edges are discarded).</p>
+
+<p>This trick reduces time, but can lead to different results. For example, if the i-th variable is removed, the k-th node might not remove an edge between the j-th variable, if the i-th variable that d-separates them is missing.</p>
+
+<h2>Whole skeleton</h2>
+
+<p>So, knowing how the algorithm works, it is time to look into the arguments of the function that constructs the whole skeleton of the network.</p>
+
+<h3>mmhc.skel : Arguments</h3>
+
+<p><code>dataset</code> : A matrix with the variables. The user must know if they are continuous or if they are categorical. When the matrix includes categorical data (i.e. 0, 1, 2, 3 where each number indicates a category) the minimum number for each variable must be 0. data.frame is also supported, as the dataset in this case is converted into a matrix. <em>Here</em> we use the whole Wine dataset</p>
+
+<p><code>max_k</code> : The maximum conditioning set to use in the conditional independence test (see Details of SES or MMPC). <em>Here</em> we choose 3</p>
+
+<p><code>threshold</code> : Threshold ( suitable values in (0, 1) ) for assessing p-values significance. <em>Here</em> we choose the default value of 0.05.  </p>
+
+<p><code>test</code> :  The conditional independence test to use. Default value is &ldquo;testIndFisher&rdquo;. This procedure allows for &ldquo;testIndFisher&rdquo;, &ldquo;testIndSPearman&rdquo; for continuous variables and &ldquo;gSquare&rdquo; for categorical variables. In case the dataset is a data.frame with mixed types of data, we recommend to set the argument as NULL. Then an appropriate test will be selected. See <code>MMPC</code> for the automatic choice of tests. <em>Here</em> we choose <code>NULL</code>, so that the appropriate test can be automatically selected.</p>
+
+<p><code>type</code> :  The type of variable selection to take place for each variable (or node). The default (and standard) is &ldquo;MMPC&rdquo;. You can also choose &ldquo;SES&rdquo; and thus allow for multiple signatures of variables to be connected to a variable. <em>Here</em> we choose to use <code>MMPC</code></p>
+
+<p><code>backward</code> :  If TRUE, the backward (or symmetry correction) phase will be implemented. This removes any falsely included variables in the parents and children set of the target variable. The <code>mmpcbackphase</code> is therefore called. <em>Here</em> we set the argument to be TRUE.</p>
+
+<p><code>symmetry</code> :  In order for an edge to be added, a statistical relationship must have been found from both directions. If you want this symmetry correction to take place, leave this boolean variable TRUE. When set to FALSE, an edge will not be added if a relationship between Y and X is detected but not between X and Y. <em>Here</em> we set the argument to be TRUE.</p>
+
+<p><code>nc</code> :  How many cores to use. This plays an important role in cases of many variables. If the function is called at a multicore machine, this is a must option. <em>Here</em> we use only one core, since the dataset is small.</p>
+
+<p><code>ini.pvalue</code> :  A list with the matrix of the univariate p-values. In cases where mmhc.skel is run more than once, the univariate associations need not be calculated again. <em>Here</em> we do not provide an initial list.</p>
+
+<p><code>hash</code> :   A boolean variable which indicates whether (TRUE) or not (FALSE) to store the statistics calculated during MMPC or SES execution in a hash-type object. Default value is FALSE. If TRUE a hashObject is produced. <em>Here</em> we set it TRUE, because we would like to see the accurate count of the the number of tests performed.</p>
+
+<h3>mmhc.skel : Run</h3>
+
+<pre><code class="r">### ~ ~ ~ Running MMHC skeleton with MMPC ~ ~ ~ ###
+MmhcSkeleton &lt;- MXM::mmhc.skel(dataset    = wine[, 1:8], 
+                               max_k      = 3, 
+                               threshold  = 0.05,
+                               test       = NULL,
+                               type       = &quot;MMPC&quot;,
+                               backward   = TRUE,
+                               symmetry   = TRUE,
+                               nc         = 1,
+                               ini.pvalue = NULL,
+                               hash       = TRUE)
+</code></pre>
+
+<h3>mmhc.skel : Output</h3>
+
+<p>The main reason of running MMHC would be to construct the network. Information about the edges between the nodes are appended in a adjacency matrix, where a value of 1 in G[i,j] appears also in G[j,i] and indicates that i,j have an edge between them. <code>$G</code> is the adjacency matrix.</p>
+
+<pre><code class="r">head(MmhcSkeleton$G)
+</code></pre>
+
+<pre><code>##            Type Alcohol Malic Ash Alcalinity Magnesium Phenols Flavanoids
+## Type          0       1     0   1          1         0       0          1
+## Alcohol       1       0     0   0          0         0       0          0
+## Malic         0       0     0   0          0         0       0          0
+## Ash           1       0     0   0          1         1       0          0
+## Alcalinity    1       0     0   1          0         0       0          0
+## Magnesium     0       0     0   1          0         0       0          0
+</code></pre>
+
+<p>In order to see the graph, we may use the <code>plotnetwork</code> function and an interactive graph is constructed.</p>
+
+<pre><code class="r">## MXM::plotnetwork(MmhcSkeleton$G, &quot;MMHC with MMPC Network&quot;)
+</code></pre>
+
+<p>The summary statistics about the edges (minimum, maximum, mean, median number of edges) and the density of edges (#edges / n(n-1)/2, where n is the number of variables), can be found in the <code>$info</code> and  <code>$density</code> respectively.    </p>
+
+<pre><code class="r">MmhcSkeleton$info
+</code></pre>
+
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    0.00    1.00    1.50    1.75    2.25    4.00
+</code></pre>
+
+<pre><code class="r">MmhcSkeleton$density
+</code></pre>
+
+<pre><code>## [1] 0.25
+</code></pre>
+
+<p>The matrix with the final p-values is also returned </p>
+
+<pre><code class="r">head(MmhcSkeleton$pvalue)
+</code></pre>
+
+<pre><code>##                  Type      Alcohol      Malic        Ash  Alcalinity
+## Type         0.000000 -34.57419750 -1.2899274  -8.401684 -16.7240722
+## Alcohol    -34.574197   0.00000000 -1.5602574  -1.144140  -0.9777993
+## Malic       -1.289927  -1.56025742  0.0000000  -0.548314  -2.4545047
+## Ash         -8.401684  -1.14414005 -0.5483140   0.000000 -26.0703528
+## Alcalinity -16.724072  -0.97779927 -2.4545047 -26.070353   0.0000000
+## Magnesium   -2.601032  -0.02754831 -0.7564002  -4.525253  -1.3136856
+##              Magnesium     Phenols   Flavanoids
+## Type       -2.60103201 -0.04979364 -52.94060381
+## Alcohol    -0.02754831 -2.21132896  -0.33078218
+## Malic      -0.75640022 -0.44128360  -0.08744842
+## Ash        -4.52525285 -2.45121237  -2.07053875
+## Alcalinity -1.31368558 -0.46776108  -0.29538868
+## Magnesium   0.00000000 -1.49005503  -0.24959600
+</code></pre>
+
+<p>and the p-values of all pairwise univariate associations refers to the <code>$ini.pvalue</code> matrix.</p>
+
+<pre><code class="r">head(MmhcSkeleton$ini.pvalue)
+</code></pre>
+
+<pre><code>##           [,1]       [,2]        [,3]       [,4]       [,5]        [,6]
+## [1,]   0.00000 -77.252723 -26.3781997 -12.790326 -32.143710 -11.8691788
+## [2,] -81.69325   0.000000  -1.5602574  -5.384322 -10.594634  -8.2696065
+## [3,] -30.81859  -1.560257   0.0000000  -3.552083  -9.271166  -0.7564002
+## [4,] -12.39241  -5.384322  -3.5520829   0.000000 -21.281510  -9.1596408
+## [5,] -29.99076 -10.594634  -9.2711662 -21.281510   0.000000  -1.3138901
+## [6,] -11.33496  -8.212376  -0.7586787  -9.090335  -1.313686   0.0000000
+##            [,7]        [,8]
+## [1,] -61.991352 -110.258167
+## [2,]  -9.306339   -6.529742
+## [3,] -12.246011  -18.232525
+## [4,]  -2.451212   -2.070539
+## [5,] -11.297231  -13.399195
+## [6,]  -5.499187   -4.730965
+</code></pre>
+
+<p>The number of the tests that SES or MMPC (<em>Here</em> it is about MMPC, since this selection method was used) are included in the <code>$ntests</code> variable</p>
+
+<pre><code class="r">MmhcSkeleton$ntests
+</code></pre>
+
+<pre><code>## univariate tests             Type          Alcohol            Malic 
+##                0               58               14               14 
+##              Ash       Alcalinity        Magnesium          Phenols 
+##               25               19               14               17 
+##       Flavanoids 
+##               19
+</code></pre>
+
+<p>and if SES was used, a vector denoting which variables had more than one signature, i.e. more than one set of variables associated with them, would be appended in the <code>$ms</code>.</p>
+
+<p>Finally, a numeric vector where the first element is the user time, the second element is the system time and the third element is the elapsed time is appended in the <code>$runtime</code> variable.</p>
+
+<pre><code class="r">MmhcSkeleton$runtime
+</code></pre>
+
+<pre><code>##    user  system elapsed 
+##    1.31    0.00    1.38
+</code></pre>
+
+<h2>Specific node</h2>
+
+<p>It is clear from the above run, that the whole skeleton of the network was constructed. In case we are interested only about one node, <code>local.mmhc.skel</code> can be used. The arguments here are less, since the backward phase takes place automatically, the symmetry can not be examined, there is no need for parallel computations etc. <em>Here</em> we use as examined node the first column (Type) of the dataset ( <code>node = 1</code>). </p>
+
+<pre><code class="r">### ~ ~ ~ Running MMHC skeleton with MMPC ~ ~ ~ ###
+MmhcLocalSkeleton &lt;- MXM::local.mmhc.skel(dataset    = wine[, 1:5], 
+                               node       = 1,
+                               max_k      = 3, 
+                               threshold  = 0.05,
+                               test       = NULL)
+</code></pre>
+
+<h1>PC</h1>
+
+<p>We are going to use PC on the above dataset in order to construct the skeleton of the network.</p>
+
+<h2>pc.skel : Arguments</h2>
+
+<p><code>dataset</code> : A matrix with the variables. It has to be clear to the user whether the data  are continuous or categorical. For categorical data, the user must transform the data.frame into a matrix. In addition, the numerical matrix must have values starting from 0. For example, 0, 1, 2, instead of &ldquo;A&rdquo;, &ldquo;B&rdquo; and &ldquo;C&rdquo;. In the case of mixed variables, (continuous, binary and ordinal) a data.frame must be provided and the non continuous variables (binary also) must be ordered factors. <em>Here</em> we use the whole Wine dataset.</p>
+
+<p><code>method</code> : For continuous data, the choices are &ldquo;pearson&rdquo;, &ldquo;spearman&rdquo; or &ldquo;distcor&rdquo;. The latter uses the distance correlation and should not be used with a great number of observations as it is by default really slow. For categorical data, this must be &ldquo;cat&rdquo;.For a mix of continuous, binary and ordinal data, &ldquo;comb.fast&rdquo; or &ldquo;comb.mm&rdquo; should be chosen. These two methods perform the symmetric test for mixed data (Tsagris et al., 2017). <em>Here</em> we choose <code>comb.fast</code>, since more than one type of data exist in the Wine dataset.</p>
+
+<p><code>id</code> : This is to be used in the glmm.pc.skel only. It is a vector for identifying the grouped data, the correlated observations, the subjects. * Here * we do not use this argument.</p>
+
+<p><code>alpha</code> :  The significance level ( suitable values in (0, 1) ) for assessing the p-values. <em>Here</em> we choose the default value 0.01.</p>
+
+<p><code>rob</code> : This is for robust estimation of the Pearson correlation coefficient. <em>Here</em> we choose the default value <code>FALSE</code>.</p>
+
+<p><code>R</code> : The number of permutations to be conducted. This is taken into consideration for the &ldquo;pc.skel&rdquo; only. The Pearson correlation coefficient is calculated and the p-value is assessed via permutations. <em>Here</em> we choose <code>R=2</code> for simplicity.</p>
+
+<p><code>ncores</code> :  How many cores to use. <em>Here</em> we do not choose the number of cores.</p>
+
+<p><code>stat</code> :  If you have the initial test statistics (univariate associations) values supply them here.  <em>Here</em> we do not have any, therefore we are not using the specific argument.</p>
+
+<p><code>ini.pvalue</code> :   If you have the initial p-values of the univariate associations supply them here. <em>Here</em> we do not have any, therefore we are not using the specific argument. </p>
+
+<h3>pc.skel : Run</h3>
+
+<pre><code class="r">### ~ ~ ~ Running MMHC skeleton with MMPC ~ ~ ~ ###
+PcSkeleton &lt;- MXM::pc.skel(dataset    = wine[, 1:8], 
+                               method      = &quot;comb.fast&quot; ,
+                               alpha       = 0.01,
+                               rob       = FALSE,
+                               R   = 1)
+</code></pre>
+
+<h3>pc.skel : Output</h3>
+
+<p>The main reason of running PC, just like MMHC, would be to construct the network. Information about the edges between the nodes are appended in a adjacency matrix. Again, <code>$G</code> is the adjacency matrix, just like in MMHC.</p>
+
+<pre><code class="r">head(PcSkeleton$G)
+</code></pre>
+
+<pre><code>##            Type Alcohol Malic Ash Alcalinity Magnesium Phenols Flavanoids
+## Type          0       1     1   1          1         0       0          1
+## Alcohol       1       0     0   0          0         0       0          0
+## Malic         1       0     0   0          0         0       0          0
+## Ash           1       0     0   0          1         0       0          0
+## Alcalinity    1       0     0   1          0         0       0          0
+## Magnesium     0       0     0   0          0         0       0          0
+</code></pre>
+
+<p>The network interactive network can be again created.  </p>
+
+<pre><code class="r">## MXM::plotnetwork(PcSkeleton$G, &quot;PC Network&quot;)
+</code></pre>
+
+<p>The values <code>info</code>, <code>density</code>, <code>pvalue</code>, <code>ini.pvalue</code> and <code>runtime</code> include the similar  information as with MMHC.   </p>
+
+<p>Here we call them only for comparing the results.</p>
+
+<pre><code class="r">PcSkeleton$info
+</code></pre>
+
+<pre><code>##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
+##    0.00    1.00    1.50    1.75    2.00    5.00
+</code></pre>
+
+<pre><code class="r">PcSkeleton$density
+</code></pre>
+
+<pre><code>## [1] 0.25
+</code></pre>
+
+<pre><code class="r">head(PcSkeleton$pvalue)
+</code></pre>
+
+<pre><code>##                  Type      Alcohol      Malic        Ash  Alcalinity
+## Type         0.000000 -53.12342795 -7.6163785  -7.974090 -13.0122570
+## Alcohol    -53.123428   0.00000000 -1.5602574  -1.705724  -0.9777993
+## Malic       -7.616379  -1.56025742  0.0000000  -3.552083  -3.2387142
+## Ash         -7.974090  -1.70572446 -3.5520829   0.000000 -21.2815102
+## Alcalinity -13.012257  -0.97779927 -3.2387142 -21.281510   0.0000000
+## Magnesium   -3.951545  -0.02776847 -0.7564002  -4.525253  -1.3138901
+##              Magnesium    Phenols  Flavanoids
+## Type       -3.95154463 -3.0910480 -52.9406038
+## Alcohol    -0.02776847 -3.8416319  -0.3307822
+## Malic      -0.75640022 -0.5788210  -0.2209009
+## Ash        -4.52525285 -2.4512124  -2.0705388
+## Alcalinity -1.31389013 -0.4677611  -3.2327091
+## Magnesium   0.00000000 -1.4900550  -0.2495960
+</code></pre>
+
+<pre><code class="r">head(PcSkeleton$ini.pvalue)
+</code></pre>
+
+<pre><code>##           [,1]       [,2]        [,3]       [,4]       [,5]        [,6]
+## [1,]   0.00000 -81.693248 -30.8185851 -12.392410 -29.990762 -11.6223614
+## [2,] -81.69325   0.000000  -1.5602574  -5.384322 -10.594634  -8.2696065
+## [3,] -30.81859  -1.560257   0.0000000  -3.552083  -9.271166  -0.7564002
+## [4,] -12.39241  -5.384322  -3.5520829   0.000000 -21.281510  -9.1596408
+## [5,] -29.99076 -10.594634  -9.2711662 -21.281510   0.000000  -1.3138901
+## [6,] -11.62236  -8.269607  -0.7564002  -9.159641  -1.313890   0.0000000
+##            [,7]        [,8]
+## [1,] -63.712666 -113.848714
+## [2,]  -9.306339   -6.529742
+## [3,] -12.246011  -18.232525
+## [4,]  -2.451212   -2.070539
+## [5,] -11.297231  -13.399195
+## [6,]  -5.507681   -4.731090
+</code></pre>
+
+<pre><code class="r">PcSkeleton$runtime
+</code></pre>
+
+<pre><code>##    user  system elapsed 
+##    0.46    0.00    0.51
+</code></pre>
+
+<p>Furthermore, the <code>pc.skel</code> object includes information about the test statistics of the univariate associations &hellip;</p>
+
+<pre><code class="r">head(PcSkeleton$stat)
+</code></pre>
+
+<pre><code>##                 Type    Alcohol      Malic       Ash Alcalinity  Magnesium
+## Type         0.00000 135.077624 36.9434250 13.312901  35.771637 12.4295843
+## Alcohol    135.07762   0.000000  1.5823981  8.245177  18.743225 13.9277185
+## Malic       36.94342   1.582398  0.0000000  4.867305  15.978879  0.5257716
+## Ash         13.31290   8.245177  4.8673049  0.000000  43.061994 15.7486903
+## Alcalinity  35.77164  18.743225 15.9788786 43.061994   0.000000  1.2307620
+## Magnesium   12.42958  13.927719  0.5257716 15.748690   1.230762  0.0000000
+##              Phenols Flavanoids
+## Type       93.733010 233.925873
+## Alcohol    16.051566  10.456738
+## Malic      22.273425  35.774268
+## Ash         2.977418   2.362009
+## Alcalinity 20.234475  24.789646
+## Magnesium   8.480164   7.015208
+</code></pre>
+
+<p>&hellip; the maximum value of k, the maximum cardinality of the conditioning set at which the algorithm stopped&hellip;</p>
+
+<pre><code class="r">PcSkeleton$kappa
+</code></pre>
+
+<pre><code>## [1] 3
+</code></pre>
+
+<p>&hellip; and a list with the separating sets for every value of k.</p>
+
+<pre><code class="r">PcSkeleton$sepset[[1]][1:5,]
+</code></pre>
+
+<pre><code>##      X Y SepVar 1        stat logged.p-value
+## [1,] 6 8        7 0.078907336    -0.24959600
+## [2,] 2 4        1 1.798509596    -1.70572446
+## [3,] 6 7        8 1.480336516    -1.49005503
+## [4,] 2 8        7 0.130488679    -0.33078218
+## [5,] 2 6        1 0.001181986    -0.02776847
+</code></pre>
+
+<h1>Partial Correlation based on Forward Selection</h1>
+
+<p>Finally, an other network construction approach would be through the use of Partial Correlation based on Forward Selection. In this Session we are going to demonstrate an example, using Forward Regression. In contrast to MMHC algorithm where MMPC or SES algorithms are run for every variable, here we are using forward regression. Partial correlation forward regression can be proven very efficient, since only correlations are being calculated.** However, it can only be applied on continuous data. **</p>
+
+<p>The <code>corfs.networks</code> function shares some arguments with the <code>mmhc.skel</code> and <code>pc.skel</code> like:</p>
+
+<p><code>x</code> : A matrix with <em>continuous</em> data. Therefore we not including the first column of the dataset (Type), which is categorical.</p>
+
+<p><code>threashold</code> : Threshold ( suitable values in (0, 1) ) for assessing p-values significance. <em>Here</em> we choose the default value of 0.05. </p>
+
+<p><code>symmetry</code> : In order for an edge to be added, a statistical relationship must have been found from both directions. If you want this symmetry correction to take place, leave this boolean variable TRUE. When set to FALSE, an edge will not be added if a relationship between Y and X is detected but not between X and Y. <em>Here</em> we set the argument to be TRUE.</p>
+
+<p><code>nc</code> : How many cores to use. <em>Here</em> we use only one core, since the dataset is small.</p>
+
+<p>However, there are some unique arguments:</p>
+
+<p><code>tolb</code> :  The difference in the BIC between two successive values. <em>Here</em> we use the default value <code>2</code>, which means that in case the BIC difference between two successive models is less than 2, the process stops and the last variable, even though significant does not enter the model.</p>
+
+<p><code>tolr</code> :  The difference in the adjusted R<sup>2</sup> between two successive values. <em>Here</em> we use the default value <code>0.02</code>, which means that in case the difference of adjusted R<sup>2</sup> between two successive models is less than 0.02, the process stops and the last variable, even though significant does not enter the model.</p>
+
+<p><code>stopping</code> :  The stopping rule. &ldquo;BIC&rdquo; is the default value, but can change to &ldquo;ar2&rdquo; and in this case the adjusted R<sup>2</sup> is used. If you want both of these criteria to be satisfied, type &ldquo;BICR2&rdquo;. <em>Here</em> we choose <code>&quot;BICR2&quot;</code>.</p>
+
+<pre><code class="r">### ~ ~ ~  Running FS skeleton  ~ ~ ~ ###
+FSSkeleton &lt;- MXM::corfs.network(x = as.matrix(wine[, -1]), 
+                               threshold  = 0.05,
+                               symmetry = TRUE,
+                               tolb       = 2,
+                               tolr = 0.02,
+                               stopping   = &quot;BICR2&quot;,
+                               nc         = 1)
+</code></pre>
+
+<p>As far as the output is considered, in the <code>$G</code> matrix we find again the adjacency matrix that can create an interactive plot.</p>
+
+<pre><code class="r">## MXM::plotnetwork(FSSkeleton$G, &quot;Partial Correlation based on FS Network&quot;)
+</code></pre>
+
+<p>The values <code>runtime</code>, <code>density</code>, <code>info</code> and <code>ntests</code> include information similar to <code>mmhc.skel</code>.</p>
+
+<h1>Conclusion</h1>
+
+<blockquote>
+<p>Now you are ready to construct the undirected bayesian skeleton of your data!<br/>
+Thank you for your attention.<br/>
+Hope that you found this tutorial helpful.    </p>
+</blockquote>
+
+<h1>Session Info {.unnumbered}</h1>
+
+<p>All analyses have been applied on:</p>
+
+<pre><code class="r">sessionInfo()
+</code></pre>
+
+<pre><code>## R version 3.6.0 (2019-04-26)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 17134)
+## 
+## Matrix products: default
+## 
+## locale:
+## [1] LC_COLLATE=C                  LC_CTYPE=Greek_Greece.1253   
+## [3] LC_MONETARY=Greek_Greece.1253 LC_NUMERIC=C                 
+## [5] LC_TIME=Greek_Greece.1253    
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] dplyr_0.8.1 MXM_1.4.4  
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rfast2_0.0.2        tidyselect_0.2.5    xfun_0.7           
+##  [4] slam_0.1-45         sets_1.0-18         purrr_0.3.2        
+##  [7] splines_3.6.0       lattice_0.20-38     htmltools_0.3.6    
+## [10] survival_2.44-1.1   rlang_0.3.4         R.oo_1.22.0        
+## [13] nloptr_1.2.1        pillar_1.4.0        glue_1.3.1         
+## [16] R.utils_2.8.0       RcppZiggurat_0.1.5  foreach_1.4.4      
+## [19] R.cache_0.13.0      stringr_1.4.0       MatrixModels_0.4-1 
+## [22] bdsmatrix_1.3-3     R.methodsS3_1.7.1   visNetwork_2.0.6   
+## [25] htmlwidgets_1.3     codetools_0.2-16    evaluate_0.13      
+## [28] geepack_1.2-1       coxme_2.2-10        knitr_1.22         
+## [31] SparseM_1.77        doParallel_1.0.14   parallel_3.6.0     
+## [34] quantreg_5.38       markdown_0.9        Rfast_1.9.4        
+## [37] Rcpp_1.0.1          relations_0.6-8     jsonlite_1.6       
+## [40] R.rsp_0.43.1        lme4_1.1-21         digest_0.6.18      
+## [43] stringi_1.4.3       ordinal_2019.4-25   numDeriv_2016.8-1  
+## [46] grid_3.6.0          tools_3.6.0         magrittr_1.5       
+## [49] tibble_2.1.1        cluster_2.0.8       ucminf_1.1-4       
+## [52] bigmemory.sri_0.1.3 bigmemory_4.5.33    crayon_1.3.4       
+## [55] pkgconfig_2.0.2     MASS_7.3-51.4       Matrix_1.2-17      
+## [58] energy_1.7-5        iterators_1.0.10    assertthat_0.2.1   
+## [61] minqa_1.2.4         R6_2.4.0            boot_1.3-22        
+## [64] nnet_7.3-12         nlme_3.1-139        compiler_3.6.0
+</code></pre>
+
+<h1>References {.unnumbered}</h1>
+
+<p>Tsagris M., Borboudakis G., Lagani V. and Tsamardinos I. (2018). Constraint-based Causal Discovery with Mixed Data. 
+International Journal of Data Science and Analytics. </p>
+
+<p>Tsamardinos, I., Brown, L.E. &amp; Aliferis, C.F. Mach Learn (2006) 65: 31. <a href="https://doi.org/10.1007/s10994-006-6889-7">https://doi.org/10.1007/s10994-006-6889-7</a></p>
+
+<p>Brown L. E., Tsamardinos I., &amp; Aliferis C. F. (2004). A novel algorithm for scalable and accurate Bayesian network learning. Medinfo, 711-715.</p>
+
+<p>Spirtes P., Glymour C. and Scheines R. (2001). Causation, Prediction, and Search. The MIT Press, Cambridge, MA, USA, 3nd edition.  </p>
+
+<p>Spirtes, P., Glymour, C. &amp; Scheines, R. (1993). Causation, Prediction, and Search. DOI: 10.1007/978-1-4612-2748-9</p>
+
+</body>
+
+</html>

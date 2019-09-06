@@ -11,67 +11,10 @@
 setOldClass('proc_time')
 
 setClass(Class='SESoutput', 
-         slots=list(selectedVars='numeric', selectedVarsOrder='numeric', queues='list', signatures='matrix', hashObject='list', pvalues='numeric', stats='numeric', max_k='numeric', threshold='numeric', runtime='proc_time'), 
-         prototype=list(selectedVars=NULL, selectedVarsOrder=NULL, queues=NULL, signatures=NULL, hashObject=NULL, pvalues=NULL, stats=NULL, max_k=NULL, threshold=NULL, runtime=NULL));
+           slots=list(selectedVars='numeric', selectedVarsOrder='numeric', queues='list', signatures='matrix', hashObject='list', pvalues='numeric', stats='numeric', univ = 'list', max_k='numeric', threshold='numeric', n.tests='numeric', runtime='proc_time', test='character'), 
+         prototype=list(selectedVars=NULL, selectedVarsOrder=NULL, queues=NULL, signatures=NULL, hashObject=NULL, pvalues=NULL, stats=NULL, univ=NULL, max_k=NULL, threshold=NULL, n.tests=NULL, runtime=NULL, test=NULL));
 
-setMethod("summary", signature(object="SESoutput"), 
-          function(object){
-            x = object;
-            #cat("General summary of the SESoutput object:\n")
-            #summary(x);
-            if( length(x@selectedVars) == 0 )
-            {
-              cat("\nSelected Variables: ")
-              print(x@selectedVars);
-              cat("\nSelected Variables ordered by pvalue: ")
-              print(x@selectedVarsOrder);
-              cat("\nQueues' summary:\n")
-              print(x@queues)
-              cat("\nNumber of signatures: ")
-              cat(0);
-              cat("\nhashObject summary:\n")
-              print(base::summary(x@hashObject));
-              cat("\nSummary of the generated pvalues matrix:\n")
-              print(base::summary(x@pvalues));
-              cat("\nSummary of the generated stats matrix:\n")
-              print(base::summary(x@stats));
-              cat("\nmax_k option: ")
-              cat(x@max_k);
-              cat("\nthreshold option: ")
-              cat(x@threshold);
-              cat("\nTotal Runtime:\n")
-              print(x@runtime)
-              #cat("    user system elapsed\n")
-              #print(x@runtime[1:3]);
-            }else{
-              cat("\nSelected Variables: ")
-              print(x@selectedVars);
-              cat("\nSelected Variables ordered by pvalue: ")
-              print(x@selectedVarsOrder);
-              cat("\nQueues' summary (# of equivalences for each selectedVar):\n\n")
-              q = as.data.frame(t(as.matrix(lapply(1:length(x@queues), function(i)return(length(x@queues[[i]]))))))
-              colnames(q) = x@selectedVars;
-              rownames(q) = '#of equivalences'
-              print(q);
-              cat("\nNumber of signatures: ")
-              print(dim(x@signatures)[1]);
-              cat("\nhashObject summary:\n")
-              print(base::summary(x@hashObject));
-              cat("\nSummary of the generated pvalues matrix:\n")
-              print(base::summary(x@pvalues));
-              cat("\nSummary of the generated stats matrix:\n")
-              print(base::summary(x@stats));
-              cat("\nmax_k option: ")
-              print(x@max_k);
-              cat("\nthreshold option: ")
-              print(x@threshold);
-              cat("\nTotal Runtime:\n")
-              print(x@runtime)
-              #cat("    user system elapsed\n")
-              #print(x@runtime[1:3]);
-            }
-          }
-);
+
 setMethod("plot", signature(x="SESoutput"), 
           function(x,mode="all", ...){
             

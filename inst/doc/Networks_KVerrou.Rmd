@@ -1,0 +1,376 @@
+---
+title: "Tutorial: Bayesian Network Construction"
+author:
+- name: Kleio - Maria Verrou
+  affiliation:
+  - Medicine Department, University of Crete, Greece
+  - Mens ex Machina Group, Computer Science Department, University of Crete, Greece
+
+- name: Michail Tsagris
+  affiliation: Mens ex Machina Group, Computer Science Department, University of Crete, Greece
+  email: mtsagris@csd.uoc.gr
+date: "`r Sys.Date()`"
+output:
+  BiocStyle::html_document:
+    toc_float: true
+  BiocStyle::pdf_document2: default
+
+vignette: |
+  %\VignetteIndexEntry{Tutorial: Bayesian Network Construction}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteEncoding{UTF-8}
+---
+
+<br>
+<br>
+<img src = 'https://s22.postimg.cc/rpuduutb5/image.png' width="500" height="1000" align="middle" />
+<br>
+<br> 
+
+
+# Introduction
+  
+  
+The MXM R Package, short for the latin 'Mens ex Machina' ( Mind from the Machine ), is a collection of utility functions for feature selection, cross validation and Bayesian Networks. It is well known in the literature that the problem of learning the structure of Bayesian networks is very hard to tackle, because of the computational complexity. MXM offers many Bayesian Network construction algorithms, taking advantage of different heuristics that are described in the published algorithms.
+  
+In this tutorial we will learn how to construct the skeleton of a **Bayesian network**. For this task, we are going to use three different algorithms.
+
+1. Max-Min Hill-Climbing (MMHC): The algorithm combines ideas from local learning, constraint-based, and search-and-score techniques in a principled and effective way. It first reconstructs the skeleton of a Bayesian network and then performs a Bayesian-scoring greedy hill-climbing search to orient the edges.(Tsamardinos et al., 2006)
+
+2. PC:  The algorithm is a structure learning/causal discovery algorithm developed at Carnegie Mellon University by Peter Spirtes and Clark Glymour and is implemented in MXM package as proposed by Spirtes et al. (2001). 
+
+3. Partial Correlation based on Forward Selection: In this approach, the network construction uses the partial correlation based forward regression. 
+
+
+For simplicity, in this tutorial, we will use a dataset referred as **"The Wine Dataset"**. 
+
+# Loading Data
+**The Wine Dataset** contains the results of a chemical analysis of wines grown in a specific area of Italy. Three types of wine are represented in the 178 samples, with the results of 13 chemical analyses recorded for each sample. Note that the "Type" variable was transformed into a categorical variable.
+
+
+So, first of all, for this tutorial analysis, we are loading the 'MXM' library and 'dplyr' library for handling easier the dataset, but note that the second one is not necessary for the analysis.  
+
+```{r, warning =  FALSE, message = FALSE }
+
+### ~ ~ ~ Load Packages ~ ~ ~ ###
+library(MXM) 
+library(dplyr)
+
+```
+
+On a next step we are downloading and opening the dataset, defining also the column names.
+
+```{r}
+
+### ~ ~ ~ Load The Dataset ~ ~ ~ ###
+wine.url <- "ftp://ftp.ics.uci.edu/pub/machine-learning-databases/wine/wine.data"
+wine <- read.csv(wine.url,
+                 check.names = FALSE,
+                 header = FALSE) 
+wine[, 1] <- as.factor(wine[, 1])
+head(wine)
+str(wine)
+colnames(wine) <- c('Type', 'Alcohol', 'Malic', 'Ash', 
+                    'Alcalinity', 'Magnesium', 'Phenols', 
+                    'Flavanoids', 'Nonflavanoids',
+                    'Proanthocyanins', 'Color', 'Hue', 
+                    'Dilution', 'Proline')
+```
+
+
+# MMHC
+
+We are going to use MMHC on the above dataset in order to construct the skeleton of the network. MMHC uses conditional independence test on each variable. 
+Firstly, MMPC runs on every variable. The backward phase (see Tsamardinos et al., 2006) takes place automatically. After all variables have been used, the matrix is checked for inconsistencies which are then corrected.
+  
+A trick mentioned in that paper to make the procedure faster is the following. In the k-th variable, the algorithm checks how many previously scanned variables have an edge with the k-th variable and keeps them along with the next (unscanned) variables (variables without edges are discarded).
+  
+This trick reduces time, but can lead to different results. For example, if the i-th variable is removed, the k-th node might not remove an edge between the j-th variable, if the i-th variable that d-separates them is missing.
+  
+
+## Whole skeleton
+
+So, knowing how the algorithm works, it is time to look into the arguments of the function that constructs the whole skeleton of the network.
+
+### mmhc.skel : Arguments
+
+
+`dataset` : A matrix with the variables. The user must know if they are continuous or if they are categorical. When the matrix includes categorical data (i.e. 0, 1, 2, 3 where each number indicates a category) the minimum number for each variable must be 0. data.frame is also supported, as the dataset in this case is converted into a matrix. *Here* we use the whole Wine dataset
+  
+`max_k` : The maximum conditioning set to use in the conditional independence test (see Details of SES or MMPC). *Here* we choose 3
+  
+`threshold` : Threshold ( suitable values in (0, 1) ) for assessing p-values significance. *Here* we choose the default value of 0.05.  
+  
+`test` :  The conditional independence test to use. Default value is "testIndFisher". This procedure allows for "testIndFisher", "testIndSPearman" for continuous variables and "gSquare" for categorical variables. In case the dataset is a data.frame with mixed types of data, we recommend to set the argument as NULL. Then an appropriate test will be selected. See `MMPC` for the automatic choice of tests. *Here* we choose `NULL`, so that the appropriate test can be automatically selected.
+  
+`type` :  The type of variable selection to take place for each variable (or node). The default (and standard) is "MMPC". You can also choose "SES" and thus allow for multiple signatures of variables to be connected to a variable. *Here* we choose to use `MMPC`
+  
+`backward` :  If TRUE, the backward (or symmetry correction) phase will be implemented. This removes any falsely included variables in the parents and children set of the target variable. The `mmpcbackphase` is therefore called. *Here* we set the argument to be TRUE.
+  
+`symmetry` :  In order for an edge to be added, a statistical relationship must have been found from both directions. If you want this symmetry correction to take place, leave this boolean variable TRUE. When set to FALSE, an edge will not be added if a relationship between Y and X is detected but not between X and Y. *Here* we set the argument to be TRUE.
+  
+`nc` :  How many cores to use. This plays an important role in cases of many variables. If the function is called at a multicore machine, this is a must option. *Here* we use only one core, since the dataset is small.
+  
+`ini.pvalue` :  A list with the matrix of the univariate p-values. In cases where mmhc.skel is run more than once, the univariate associations need not be calculated again. *Here* we do not provide an initial list.
+  
+`hash` :   A boolean variable which indicates whether (TRUE) or not (FALSE) to store the statistics calculated during MMPC or SES execution in a hash-type object. Default value is FALSE. If TRUE a hashObject is produced. *Here* we set it TRUE, because we would like to see the accurate count of the the number of tests performed.
+
+
+### mmhc.skel : Run
+
+```{r}
+### ~ ~ ~ Running MMHC skeleton with MMPC ~ ~ ~ ###
+MmhcSkeleton <- MXM::mmhc.skel(dataset    = wine[, 1:8], 
+                               max_k      = 3, 
+                               threshold  = 0.05,
+                               test       = NULL,
+                               type       = "MMPC",
+                               backward   = TRUE,
+                               symmetry   = TRUE,
+                               nc         = 1,
+                               ini.pvalue = NULL,
+                               hash       = TRUE)
+```
+
+
+  
+### mmhc.skel : Output
+  
+The main reason of running MMHC would be to construct the network. Information about the edges between the nodes are appended in a adjacency matrix, where a value of 1 in G[i,j] appears also in G[j,i] and indicates that i,j have an edge between them. `$G` is the adjacency matrix.
+
+
+```{r}
+head(MmhcSkeleton$G)
+```
+
+  
+In order to see the graph, we may use the `plotnetwork` function and an interactive graph is constructed.
+
+```{r}
+## MXM::plotnetwork(MmhcSkeleton$G, "MMHC with MMPC Network")
+```
+  
+The summary statistics about the edges (minimum, maximum, mean, median number of edges) and the density of edges (#edges / n(n-1)/2, where n is the number of variables), can be found in the `$info` and  `$density` respectively.    
+
+
+```{r}
+MmhcSkeleton$info
+```
+```{r}
+MmhcSkeleton$density
+```
+  
+The matrix with the final p-values is also returned 
+
+```{r}
+head(MmhcSkeleton$pvalue)
+```
+  
+and the p-values of all pairwise univariate associations refers to the `$ini.pvalue` matrix.
+  
+```{r}
+head(MmhcSkeleton$ini.pvalue)
+```  
+  
+The number of the tests that SES or MMPC (*Here* it is about MMPC, since this selection method was used) are included in the `$ntests` variable
+
+```{r}
+MmhcSkeleton$ntests
+```  
+ 
+and if SES was used, a vector denoting which variables had more than one signature, i.e. more than one set of variables associated with them, would be appended in the `$ms`.
+
+
+Finally, a numeric vector where the first element is the user time, the second element is the system time and the third element is the elapsed time is appended in the `$runtime` variable.
+
+```{r}
+MmhcSkeleton$runtime
+```
+## Specific node
+  
+It is clear from the above run, that the whole skeleton of the network was constructed. In case we are interested only about one node, `local.mmhc.skel` can be used. The arguments here are less, since the backward phase takes place automatically, the symmetry can not be examined, there is no need for parallel computations etc. *Here* we use as examined node the first column (Type) of the dataset ( `node = 1 `). 
+   
+```{r}
+### ~ ~ ~ Running MMHC skeleton with MMPC ~ ~ ~ ###
+MmhcLocalSkeleton <- MXM::local.mmhc.skel(dataset    = wine[, 1:5], 
+                               node       = 1,
+                               max_k      = 3, 
+                               threshold  = 0.05,
+                               test       = NULL)
+```  
+  
+
+# PC
+
+We are going to use PC on the above dataset in order to construct the skeleton of the network.
+
+## pc.skel : Arguments
+
+
+`dataset` : A matrix with the variables. It has to be clear to the user whether the data  are continuous or categorical. For categorical data, the user must transform the data.frame into a matrix. In addition, the numerical matrix must have values starting from 0. For example, 0, 1, 2, instead of "A", "B" and "C". In the case of mixed variables, (continuous, binary and ordinal) a data.frame must be provided and the non continuous variables (binary also) must be ordered factors. *Here* we use the whole Wine dataset.
+  
+`method` : For continuous data, the choices are "pearson", "spearman" or "distcor". The latter uses the distance correlation and should not be used with a great number of observations as it is by default really slow. For categorical data, this must be "cat".For a mix of continuous, binary and ordinal data, "comb.fast" or "comb.mm" should be chosen. These two methods perform the symmetric test for mixed data (Tsagris et al., 2017). *Here* we choose `comb.fast`, since more than one type of data exist in the Wine dataset.
+  
+`id` : This is to be used in the glmm.pc.skel only. It is a vector for identifying the grouped data, the correlated observations, the subjects. * Here * we do not use this argument.
+  
+`alpha` :  The significance level ( suitable values in (0, 1) ) for assessing the p-values. *Here* we choose the default value 0.01.
+  
+`rob` : This is for robust estimation of the Pearson correlation coefficient. *Here* we choose the default value `FALSE`.
+
+`R` : The number of permutations to be conducted. This is taken into consideration for the "pc.skel" only. The Pearson correlation coefficient is calculated and the p-value is assessed via permutations. *Here* we choose `R=2` for simplicity.
+  
+`ncores` :  How many cores to use. *Here* we do not choose the number of cores.
+  
+`stat` :  If you have the initial test statistics (univariate associations) values supply them here.  *Here* we do not have any, therefore we are not using the specific argument.
+  
+`ini.pvalue` :   If you have the initial p-values of the univariate associations supply them here. *Here* we do not have any, therefore we are not using the specific argument. 
+
+
+### pc.skel : Run
+
+```{r}
+### ~ ~ ~ Running MMHC skeleton with MMPC ~ ~ ~ ###
+PcSkeleton <- MXM::pc.skel(dataset    = wine[, 1:8], 
+                               method      = "comb.fast" ,
+                               alpha       = 0.01,
+                               rob       = FALSE,
+                               R   = 1)
+```
+  
+### pc.skel : Output 
+ 
+The main reason of running PC, just like MMHC, would be to construct the network. Information about the edges between the nodes are appended in a adjacency matrix. Again, `$G` is the adjacency matrix, just like in MMHC.
+
+```{r}
+head(PcSkeleton$G)
+```
+  
+The network interactive network can be again created.  
+  
+```{r}
+## MXM::plotnetwork(PcSkeleton$G, "PC Network")
+```  
+  
+The values `info`, `density`, `pvalue`, `ini.pvalue` and `runtime` include the similar  information as with MMHC.   
+  
+Here we call them only for comparing the results.
+  
+```{r}
+PcSkeleton$info
+```
+```{r}
+PcSkeleton$density
+```
+```{r}
+head(PcSkeleton$pvalue)
+```
+```{r}
+head(PcSkeleton$ini.pvalue)
+```
+```{r}
+PcSkeleton$runtime
+```   
+    
+  
+Furthermore, the `pc.skel` object includes information about the test statistics of the univariate associations ...
+
+```{r}
+head(PcSkeleton$stat)
+```   
+  
+... the maximum value of k, the maximum cardinality of the conditioning set at which the algorithm stopped...
+  
+```{r}
+PcSkeleton$kappa
+```   
+  
+... and a list with the separating sets for every value of k.
+
+```{r}
+PcSkeleton$sepset[[1]][1:5,]
+```   
+
+
+
+#  Partial Correlation based on Forward Selection
+
+Finally, an other network construction approach would be through the use of Partial Correlation based on Forward Selection. In this Session we are going to demonstrate an example, using Forward Regression. In contrast to MMHC algorithm where MMPC or SES algorithms are run for every variable, here we are using forward regression. Partial correlation forward regression can be proven very efficient, since only correlations are being calculated.** However, it can only be applied on continuous data. **
+
+
+The `corfs.networks` function shares some arguments with the `mmhc.skel` and `pc.skel` like:
+  
+`x` : A matrix with *continuous* data. Therefore we not including the first column of the dataset (Type), which is categorical.
+  
+`threashold` : Threshold ( suitable values in (0, 1) ) for assessing p-values significance. *Here* we choose the default value of 0.05. 
+  
+`symmetry` : In order for an edge to be added, a statistical relationship must have been found from both directions. If you want this symmetry correction to take place, leave this boolean variable TRUE. When set to FALSE, an edge will not be added if a relationship between Y and X is detected but not between X and Y. *Here* we set the argument to be TRUE.
+  
+`nc` : How many cores to use. *Here* we use only one core, since the dataset is small.
+  
+However, there are some unique arguments:
+  
+`tolb` :  The difference in the BIC between two successive values. *Here* we use the default value `2`, which means that in case the BIC difference between two successive models is less than 2, the process stops and the last variable, even though significant does not enter the model.
+  
+`tolr` :  The difference in the adjusted R^2 between two successive values. *Here* we use the default value `0.02`, which means that in case the difference of adjusted R^2 between two successive models is less than 0.02, the process stops and the last variable, even though significant does not enter the model.
+  
+`stopping` :  The stopping rule. "BIC" is the default value, but can change to "ar2" and in this case the adjusted R^2 is used. If you want both of these criteria to be satisfied, type "BICR2". *Here* we choose `"BICR2"`.
+
+  
+```{r, message==FALSE}
+### ~ ~ ~  Running FS skeleton  ~ ~ ~ ###
+FSSkeleton <- MXM::corfs.network(x = as.matrix(wine[, -1]), 
+                               threshold  = 0.05,
+                               symmetry = TRUE,
+                               tolb       = 2,
+                               tolr = 0.02,
+                               stopping   = "BICR2",
+                               nc         = 1)
+```
+  
+As far as the output is considered, in the `$G` matrix we find again the adjacency matrix that can create an interactive plot.
+ 
+```{r}
+## MXM::plotnetwork(FSSkeleton$G, "Partial Correlation based on FS Network")
+```
+  
+The values `runtime`, `density`, `info` and `ntests` include information similar to `mmhc.skel`.
+  
+
+  
+# Conclusion
+
+
+>Now you are ready to construct the undirected bayesian skeleton of your data!   
+>Thank you for your attention.    
+>Hope that you found this tutorial helpful.    
+
+
+
+# Session Info {.unnumbered}  
+All analyses have been applied on:
+
+```{r}
+sessionInfo()
+```
+
+
+
+# References {.unnumbered}
+
+
+Tsagris M., Borboudakis G., Lagani V. and Tsamardinos I. (2018). Constraint-based Causal Discovery with Mixed Data. 
+International Journal of Data Science and Analytics. 
+
+Tsamardinos, I., Brown, L.E. & Aliferis, C.F. Mach Learn (2006) 65: 31. https://doi.org/10.1007/s10994-006-6889-7
+  
+Brown L. E., Tsamardinos I., & Aliferis C. F. (2004). A novel algorithm for scalable and accurate Bayesian network learning. Medinfo, 711-715.
+   
+Spirtes P., Glymour C. and Scheines R. (2001). Causation, Prediction, and Search. The MIT Press, Cambridge, MA, USA, 3nd edition.  
+   
+Spirtes, P., Glymour, C. & Scheines, R. (1993). Causation, Prediction, and Search. DOI: 10.1007/978-1-4612-2748-9
+  
+  
+
+
+
+

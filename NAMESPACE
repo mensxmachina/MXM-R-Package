@@ -1,69 +1,102 @@
-useDynLib(MXM, .registration = TRUE)
-
-#testIndFisher
-importFrom("stats", coef)
-importFrom("stats", resid)
-importFrom("stats", cor)
+#useDynLib(MXM, .registration = TRUE)
 
 #testIndLogistic
-importFrom("stats", model.frame)
-importFrom("stats", model.matrix)
-importFrom("stats", glm.fit)
-importFrom("stats", deviance)
-importFrom("stats", as.formula)
-importFrom("stats", pchisq)
 importFrom("nnet", multinom)
-importFrom("ordinal", clm)
+importFrom("ordinal", clm, clmm)
 
 #testIndRQ
 importFrom("quantreg", rq)
-importFrom("lmtest", lrtest)
-
-#testIndBeta
-importFrom("betareg", betareg)
 
 #testIndNB
-importFrom("MASS", glm.nb)
+importFrom("MASS", glm.nb, rlm, lm.ridge, polr)
 
-#testIndPois
-importFrom("stats", glm)
-importFrom("stats", anova)
+# censIndCR and censIndWR
+importFrom("survival", is.Surv, coxph, Surv, survreg, clogit, strata, survConcordance)
 
-#testIndReg
-importFrom("MASS", rlm)
-importFrom("stats", lm)
+#testIndGLMM
+importFrom("lme4", lmer, glmer)
 
-importFrom("survival", is.Surv, coxph)
-#importFrom("VGAM", vglm, multinomial, deviance)
-#importFrom("MASS", polr )
+importFrom("coxme", coxme)
 
-#cv.ses
-importFrom("ROCR", prediction, performance)
-importFrom("Hmisc", rcorr.cens)
-importFrom("TunePareto", generateCVRuns)
+#robust glms
+#importFrom("robust", glmRob, lmsreg)
+
+importFrom("energy", dcov.test, pdcor.test)
+
+importFrom("utils", combn)
+
+importFrom("geepack", geeglm, ordgee)
+
+importFrom("dplyr", select)
 
 #more
-importFrom("methods", new)
-importFrom("stats", predict)
-#importFrom("survival", predict.coxph)
-importFrom("stats", predict.lm)
-importFrom("utils", combn)
-importFrom("stats", var)
-importFrom("stats", pt)
-importFrom("stats", poisson)
-importFrom("stats", binomial)
-importFrom("stats", family)
+importFrom("methods", "new", "as")
+importFrom("stats", "predict", "pt", "pf", "binomial", "family", "predict.lm", "BIC", "logLik", "median", 
+            "poisson", "sd", "xtabs", "fitted", "rbinom", "runif", "drop1", "weights", "inverse.gaussian", 
+            "Gamma", "gaussian", "nlm", "optim", "rnorm", "glm", "anova", "lm", "model.frame", "model.matrix", 
+            "glm.fit", "lm.fit", "deviance", "as.formula", "pchisq", "lm.wfit",  "coef", "resid", "cor","cov", 
+            "pnorm", "mahalanobis", "var", ".lm.fit","contrasts", "model.response", "optimise", "add1", 
+            "quantile", "smooth.spline", "qchisq", "quasibinomial", "quasipoisson", "prcomp")
 
-importFrom("graphics", barplot)
-importFrom("graphics", grid)
-importFrom("graphics", lines)
-importFrom("graphics", legend)
-importFrom("graphics", axis)
+importFrom("grDevices", "dev.new")
+  
+importFrom("graphics", barplot, grid, lines, legend, axis, plot, points, abline)
 
-importFrom("pcalg", gSquareBin, gSquareDis)
-#importFrom("gRbase", combnPrim)
-#importFrom("Biobase", exprs)
+importFrom("visNetwork", "visNetwork", "visPhysics", "visInteraction", "visOptions", "%>%")
 
-export(SES, InternalSES, censIndLR, gSquare, testIndFisher, testIndLogistic, testIndRQ, testIndBeta, testIndNB, testIndPois, testIndReg, cv.ses, auc.mxm, acc.mxm, mse.mxm, ci.mxm, glm.mxm, lm.mxm, coxph.mxm)
+importFrom("relations", relation, relation_incidence, transitive_closure)
+
+importFrom("Rfast", colVars, univglms, colmeans, g2Test_univariate, g2Test_univariate_perm, g2tests, g2tests_perm, 
+           g2Test, g2Test_perm, colSort, rowSort, which.is, standardise, colrange, regression, zip.mle, beta.mle, 
+           rmvnorm, rowMaxs, rowsums, colsums, score.glms, score.betaregs, score.weibregs, score.multinomregs, 
+           score.negbinregs, score.gammaregs, sort_unique, Var, data.frame.to_matrix, fs.reg, check_data, colMaxs, 
+           cor.fsreg, pc.skel, squareform, cora, spdinv, cor.fbed, colRanks, logistic_only, omp, rint.regs,
+           poisson_only, mvbetas, ompr, glm_logistic, glm_poisson, prop.reg, normlog.reg, mvnorm.mle, normlog.mle,
+           univglms2, rint.reg, topological_sort, eachcol.apply, auc, Table, min_max, permcor, comb_n, hash2list, 
+           Hash, spml.regs, spml.mle, spml.reg)
+
+importFrom("bigmemory", read.big.matrix, sub.big.matrix)
+
+importFrom("Rfast2", bic.regs, logiquant.regs, sp.logiregs, mmpc)
+
+import("doParallel")
+import("parallel")
+import("foreach")
+
+
+export(SES, InternalSES, MMPC, InternalMMPC, SES.glmm, InternalSES.glmm, MMPC.glmm, InternalMMPC.glmm, mmhc.skel, 
+       pc.skel, pc.con, censIndCR, censIndWR, censIndER, gSquare, testIndFisher, testIndLogistic, testIndRQ, testIndGLMMReg, 
+       testIndGLMMPois, testIndGLMMLogistic, testIndMVreg, testIndBeta, testIndNB, testIndClogit, testIndPois, testIndReg, 
+       testIndSpearman, testIndZIP, testIndBinom, cv.ses, auc.mxm, acc.mxm, acc_multinom.mxm, fscore.mxm, euclid_sens.spec.mxm, 
+       mse.mxm, pve.mxm, mae.mxm, ci.mxm, ciwr.mxm, ord_mae.mxm, poisdev.mxm, nbdev.mxm, glm.mxm, lm.mxm, pois.mxm, nb.mxm, 
+	   multinom.mxm, rq.mxm, lmrob.mxm, ordinal.mxm, coxph.mxm, beta.mxm, weibreg.mxm, ridge.reg, ridgereg.cv, ridge.plot, 
+	   ses.model, mmpc.model, nei, reg.fit, pc.or, undir.path, rdag, mb, mmmb, permcor, findAncestors, findDescendants, 
+	   transitiveClosure, dag2eg, bic.fsreg, bic.glm.fsreg, fs.reg, glm.fsreg, lm.fsreg, glm.bsreg, tc.plot, cv.mmpc, mmpc.path, 
+	   condi, cat.ci, partialcor, auc, generatefolds, ma.ses, ma.mmpc, equivdags, testIndIGreg, bs.reg, zip.mod, zip.reg, zip.regs, 
+	   beta.regs, beta.mod, plotnetwork, univregs, iamb.bs, iamb, dist.condi, permFisher, permcorrels, score.univregs, perm.univregs, 
+	   perm.zipregs, perm.betaregs, wald.poissonregs, wald.logisticregs, rdag2, wald.univregs, wald.betaregs, wald.zipregs, waldBeta, 
+	   waldLogistic, waldBinom, waldCR, waldER, waldWR, waldIGreg, waldMMReg, waldNB, waldPois, waldOrdinal, waldZIP, permgSquare, 
+	   permBeta, permLogistic, permBinom, permCR, permER, permWR, permClogit, permReg, permMVreg, permRQ, permIGreg, permNB, permPois, 
+	   permZIP, perm.mmpc, perm.ses, wald.mmpc, wald.ses, cv.waldses, cv.waldmmpc, cv.permses, cv.permmmpc, waldses.model, waldmmpc.model, 
+	   wald.mmpc.path, mmpc.glmm.model, mmpcbackphase, shd, is.dag, topological_sort, corfs.network, testIndGamma, waldGamma, permGamma, 
+	   testIndNormLog, waldNormLog, permNormLog, gammafsreg, normlog.fsreg, gammabsreg, normlog.bsreg, bic.gammafsreg, bic.normlog.fsreg, 
+	   testIndTobit, waldTobit, permTobit, permDcor, rint.regs, ordinal.reg, fbed.reg, ebic.bsreg, ci.mm, ci.fast, ci.mm2, ci.fast2, 
+	   rmdag, mmpc.or, condis, local.mmhc.skel, pc.skel.boot, fbed.glmm.reg, ebic.glmm.bsreg, glmm.bsreg, glmm.pc.skel, glmm.ci.mm, 
+	   bn.skel.utils, bn.skel.utils2, conf.edge.lower, pi0est, Ness, pval.mixbeta, cor.drop1, triangles.search, testIndQBinom, testIndQPois, 
+	   testIndLMM, fbedreg.bic, ida, fbed.gee.reg, testIndMMReg, testIndMMFisher, permMMReg, permMMFisher, testIndMultinom, testIndOrdinal, 
+	   permMultinom, permOrdinal, bic.mm.fsreg, certificate.of.exclusion, ebic.univregs, testIndGEEReg, testIndGEEPois, testIndGEELogistic, 
+	   testIndGEEGamma, testIndGEENormLog, gomp, MMPC.gee, InternalMMPC.gee, ses.glmm.model, SES.gee, InternalSES.gee, mmpc.gee.model, 
+	   ses.gee.model, group.mvbetas, testIndTimeLogistic, testIndTimeMultinom, MMPC.timeclass, SES.timeclass, glmm.univregs, gee.univregs, 
+	   mmpc.timeclass.model, ses.timeclass.model, corfbed.network, ord.resid, modeler, cond.regs, gee.ci.mm, gee.pc.skel, glmm.mmhc.skel, 
+	   gee.mmhc.skel, gomp.path, testIndGLMMGamma, testIndGLMMNormLog, cv.gomp, testIndGLMMOrdinal, bbc, big.gomp, read.big.data, 
+	   supervised.pca, big.score.univregs, corgraph, big.fbed.reg, mmpc2, certificate.of.exclusion2, glmm.condregs, gee.condregs, mci.mxm, 
+	   clogit.mxm, mmpc.glmm2, mmpc.gee2, testIndGLMMCR, ebic.regs, ebic.model, testIndSPML, perm.mmpc.path, boot.gomp, censIndLLR, permLLR, 
+	   waldLLR, logiquant.regs, sp.logiregs, pc.sel)
+
 exportClasses("SESoutput")
-exportMethods("plot", "summary")
+exportClasses("MMPCoutput")
+exportClasses("mases.output")
+exportClasses("mammpc.output")
+exportClasses("SES.glmm.output")
+exportClasses("MMPC.glmm.output")
+exportMethods("plot")

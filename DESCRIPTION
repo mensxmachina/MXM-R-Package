@@ -1,18 +1,33 @@
 Package: MXM
 Type: Package
-Title: Discovering Multiple, Statistically-Equivalent Signatures
-Version: 0.5
-URL: http://www.mensxmachina.org/
-Date: 2015-09-29
-Author: Ioannis Tsamardinos, Vincenzo Lagani, Giorgos Athineou, Michail Tsagris, Giorgos Borboudakis
-Maintainer: Giorgos Athineou <athineou@ics.forth.gr>
-Description: Feature selection methods for identifying minimal, statistically-equivalent and equally-predictive feature subsets. MXM stands for "Mens eX  Machina", meaning "Mind from the Machine" in Latin.
+Title: Feature Selection (Including Multiple Solutions) and Bayesian
+        Networks
+Version: 1.4.4
+URL: http://mensxmachina.org
+Date: 2019-06-19
+Authors@R: c(person("Michail", "Tsagris", role = c("aut", "cre"), email = "mtsagris@uoc.gr"),
+           person("Ioannis", "Tsamardinos", role = c("aut", "cph"), email = "tsamard.it@gmail.com"),
+           person("Vincenzo", "Lagani", role = c("aut", "cph"), email = "vlagani@yahoo.it"), 
+           person("Giorgos", "Athineou", role = c("aut"), email = "gioathineou@gmail.com"),
+           person("Giorgos", "Borboudakis", role = c("ctb"), email = "borbudak@gmail.com"),
+           person("Anna", "Roumpelaki", role = c("ctb"), email = "anna.roumpelaki@gmail.com") )
+Author: Michail Tsagris [aut, cre],
+  Ioannis Tsamardinos [aut, cph],
+  Vincenzo Lagani [aut, cph],
+  Giorgos Athineou [aut],
+  Giorgos Borboudakis [ctb],
+  Anna Roumpelaki [ctb]
+Maintainer: Michail Tsagris <mtsagris@uoc.gr>
+Description: Many feature selection methods for a wide range of response variables, including minimal, statistically-equivalent and equally-predictive feature subsets. Bayesian network algorithms and related functions are also included. The package name 'MXM' stands for "Mens eX Machina", meaning "Mind from the Machine" in Latin. References: a) Lagani, V. and Athineou, G. and Farcomeni, A. and Tsagris, M. and Tsamardinos, I. (2017). Feature Selection with the R Package MXM: Discovering Statistically Equivalent Feature Subsets. Journal of Statistical Software, 80(7). <doi:10.18637/jss.v080.i07>. b) Tsagris, M., Lagani, V. and Tsamardinos, I. (2018). Feature selection for high-dimensional temporal data. BMC Bioinformatics, 19:17. <doi:10.1186/s12859-018-2023-7>. c) Tsagris, M., Borboudakis, G., Lagani, V. and Tsamardinos, I. (2018). Constraint-based causal discovery with mixed data. International Journal of Data Science and Analytics, 6(1): 19-30. <doi:10.1007/s41060-018-0097-y>. d) Tsagris, M., Papadovasilakis, Z., Lakiotaki, K. and Tsamardinos, I. (2018). Efficient feature selection on gene expression data: Which algorithm to use? BioRxiv. <doi:10.1101/431734>. e) Tsagris, M. (2019). Bayesian Network Learning with the PC Algorithm: An Improved and Correct Variation. Applied Artificial Intelligence, 33(2):101-123. <doi:10.1080/08839514.2018.1526760>. f) Borboudakis, G. and Tsamardinos, I. (2019). Forward-Backward Selection with Early Dropping. Journal of Machine Learning Research 20: 1-39. 
 License: GPL-2
-Suggests: gRbase, Biobase, hash
-Imports: methods, stats, utils, survival, MASS, TunePareto, ROCR,
-        Hmisc, graphics, ordinal, nnet, betareg, lmtest, quantreg,
-        pcalg
-NeedsCompilation: yes
-Packaged: 2015-09-29 09:11:17 UTC; Athinaiou
+Depends: R (>= 3.5)
+Suggests: R.rsp
+VignetteBuilder: R.rsp, knitr
+Imports: methods, stats, utils, survival, MASS, graphics, ordinal,
+        nnet, quantreg, lme4, foreach, doParallel, parallel, relations,
+        Rfast, visNetwork, energy, geepack, knitr, dplyr, bigmemory,
+        coxme, Rfast2
+NeedsCompilation: no
+Packaged: 2019-06-19 12:05:24 UTC; User
 Repository: CRAN
-Date/Publication: 2015-09-29 17:33:05
+Date/Publication: 2019-06-19 13:40:03 UTC

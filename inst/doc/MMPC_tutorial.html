@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+<title>Introduction: The MXM R package for Feature Selection</title>
+
+<script type="text/javascript">
+window.onload = function() {
+  var imgs = document.getElementsByTagName('img'), i, img;
+  for (i = 0; i < imgs.length; i++) {
+    img = imgs[i];
+    // center an image if it is the only element of its parent
+    if (img.parentElement.childElementCount === 1)
+      img.parentElement.style.textAlign = 'center';
+  }
+};
+</script>
+
+<!-- Styles for R syntax highlighter -->
+<style type="text/css">
+   pre .operator,
+   pre .paren {
+     color: rgb(104, 118, 135)
+   }
+
+   pre .literal {
+     color: #990073
+   }
+
+   pre .number {
+     color: #099;
+   }
+
+   pre .comment {
+     color: #998;
+     font-style: italic
+   }
+
+   pre .keyword {
+     color: #900;
+     font-weight: bold
+   }
+
+   pre .identifier {
+     color: rgb(0, 0, 0);
+   }
+
+   pre .string {
+     color: #d14;
+   }
+</style>
+
+<!-- R syntax highlighter -->
+<script type="text/javascript">
+var hljs=new function(){function m(p){return p.replace(/&/gm,"&amp;").replace(/</gm,"&lt;")}function f(r,q,p){return RegExp(q,"m"+(r.cI?"i":"")+(p?"g":""))}function b(r){for(var p=0;p<r.childNodes.length;p++){var q=r.childNodes[p];if(q.nodeName=="CODE"){return q}if(!(q.nodeType==3&&q.nodeValue.match(/\s+/))){break}}}function h(t,s){var p="";for(var r=0;r<t.childNodes.length;r++){if(t.childNodes[r].nodeType==3){var q=t.childNodes[r].nodeValue;if(s){q=q.replace(/\n/g,"")}p+=q}else{if(t.childNodes[r].nodeName=="BR"){p+="\n"}else{p+=h(t.childNodes[r])}}}if(/MSIE [678]/.test(navigator.userAgent)){p=p.replace(/\r/g,"\n")}return p}function a(s){var r=s.className.split(/\s+/);r=r.concat(s.parentNode.className.split(/\s+/));for(var q=0;q<r.length;q++){var p=r[q].replace(/^language-/,"");if(e[p]){return p}}}function c(q){var p=[];(function(s,t){for(var r=0;r<s.childNodes.length;r++){if(s.childNodes[r].nodeType==3){t+=s.childNodes[r].nodeValue.length}else{if(s.childNodes[r].nodeName=="BR"){t+=1}else{if(s.childNodes[r].nodeType==1){p.push({event:"start",offset:t,node:s.childNodes[r]});t=arguments.callee(s.childNodes[r],t);p.push({event:"stop",offset:t,node:s.childNodes[r]})}}}}return t})(q,0);return p}function k(y,w,x){var q=0;var z="";var s=[];function u(){if(y.length&&w.length){if(y[0].offset!=w[0].offset){return(y[0].offset<w[0].offset)?y:w}else{return w[0].event=="start"?y:w}}else{return y.length?y:w}}function t(D){var A="<"+D.nodeName.toLowerCase();for(var B=0;B<D.attributes.length;B++){var C=D.attributes[B];A+=" "+C.nodeName.toLowerCase();if(C.value!==undefined&&C.value!==false&&C.value!==null){A+='="'+m(C.value)+'"'}}return A+">"}while(y.length||w.length){var v=u().splice(0,1)[0];z+=m(x.substr(q,v.offset-q));q=v.offset;if(v.event=="start"){z+=t(v.node);s.push(v.node)}else{if(v.event=="stop"){var p,r=s.length;do{r--;p=s[r];z+=("</"+p.nodeName.toLowerCase()+">")}while(p!=v.node);s.splice(r,1);while(r<s.length){z+=t(s[r]);r++}}}}return z+m(x.substr(q))}function j(){function q(x,y,v){if(x.compiled){return}var u;var s=[];if(x.k){x.lR=f(y,x.l||hljs.IR,true);for(var w in x.k){if(!x.k.hasOwnProperty(w)){continue}if(x.k[w] instanceof Object){u=x.k[w]}else{u=x.k;w="keyword"}for(var r in u){if(!u.hasOwnProperty(r)){continue}x.k[r]=[w,u[r]];s.push(r)}}}if(!v){if(x.bWK){x.b="\\b("+s.join("|")+")\\s"}x.bR=f(y,x.b?x.b:"\\B|\\b");if(!x.e&&!x.eW){x.e="\\B|\\b"}if(x.e){x.eR=f(y,x.e)}}if(x.i){x.iR=f(y,x.i)}if(x.r===undefined){x.r=1}if(!x.c){x.c=[]}x.compiled=true;for(var t=0;t<x.c.length;t++){if(x.c[t]=="self"){x.c[t]=x}q(x.c[t],y,false)}if(x.starts){q(x.starts,y,false)}}for(var p in e){if(!e.hasOwnProperty(p)){continue}q(e[p].dM,e[p],true)}}function d(B,C){if(!j.called){j();j.called=true}function q(r,M){for(var L=0;L<M.c.length;L++){if((M.c[L].bR.exec(r)||[null])[0]==r){return M.c[L]}}}function v(L,r){if(D[L].e&&D[L].eR.test(r)){return 1}if(D[L].eW){var M=v(L-1,r);return M?M+1:0}return 0}function w(r,L){return L.i&&L.iR.test(r)}function K(N,O){var M=[];for(var L=0;L<N.c.length;L++){M.push(N.c[L].b)}var r=D.length-1;do{if(D[r].e){M.push(D[r].e)}r--}while(D[r+1].eW);if(N.i){M.push(N.i)}return f(O,M.join("|"),true)}function p(M,L){var N=D[D.length-1];if(!N.t){N.t=K(N,E)}N.t.lastIndex=L;var r=N.t.exec(M);return r?[M.substr(L,r.index-L),r[0],false]:[M.substr(L),"",true]}function z(N,r){var L=E.cI?r[0].toLowerCase():r[0];var M=N.k[L];if(M&&M instanceof Array){return M}return false}function F(L,P){L=m(L);if(!P.k){return L}var r="";var O=0;P.lR.lastIndex=0;var M=P.lR.exec(L);while(M){r+=L.substr(O,M.index-O);var N=z(P,M);if(N){x+=N[1];r+='<span class="'+N[0]+'">'+M[0]+"</span>"}else{r+=M[0]}O=P.lR.lastIndex;M=P.lR.exec(L)}return r+L.substr(O,L.length-O)}function J(L,M){if(M.sL&&e[M.sL]){var r=d(M.sL,L);x+=r.keyword_count;return r.value}else{return F(L,M)}}function I(M,r){var L=M.cN?'<span class="'+M.cN+'">':"";if(M.rB){y+=L;M.buffer=""}else{if(M.eB){y+=m(r)+L;M.buffer=""}else{y+=L;M.buffer=r}}D.push(M);A+=M.r}function G(N,M,Q){var R=D[D.length-1];if(Q){y+=J(R.buffer+N,R);return false}var P=q(M,R);if(P){y+=J(R.buffer+N,R);I(P,M);return P.rB}var L=v(D.length-1,M);if(L){var O=R.cN?"</span>":"";if(R.rE){y+=J(R.buffer+N,R)+O}else{if(R.eE){y+=J(R.buffer+N,R)+O+m(M)}else{y+=J(R.buffer+N+M,R)+O}}while(L>1){O=D[D.length-2].cN?"</span>":"";y+=O;L--;D.length--}var r=D[D.length-1];D.length--;D[D.length-1].buffer="";if(r.starts){I(r.starts,"")}return R.rE}if(w(M,R)){throw"Illegal"}}var E=e[B];var D=[E.dM];var A=0;var x=0;var y="";try{var s,u=0;E.dM.buffer="";do{s=p(C,u);var t=G(s[0],s[1],s[2]);u+=s[0].length;if(!t){u+=s[1].length}}while(!s[2]);if(D.length>1){throw"Illegal"}return{r:A,keyword_count:x,value:y}}catch(H){if(H=="Illegal"){return{r:0,keyword_count:0,value:m(C)}}else{throw H}}}function g(t){var p={keyword_count:0,r:0,value:m(t)};var r=p;for(var q in e){if(!e.hasOwnProperty(q)){continue}var s=d(q,t);s.language=q;if(s.keyword_count+s.r>r.keyword_count+r.r){r=s}if(s.keyword_count+s.r>p.keyword_count+p.r){r=p;p=s}}if(r.language){p.second_best=r}return p}function i(r,q,p){if(q){r=r.replace(/^((<[^>]+>|\t)+)/gm,function(t,w,v,u){return w.replace(/\t/g,q)})}if(p){r=r.replace(/\n/g,"<br>")}return r}function n(t,w,r){var x=h(t,r);var v=a(t);var y,s;if(v){y=d(v,x)}else{return}var q=c(t);if(q.length){s=document.createElement("pre");s.innerHTML=y.value;y.value=k(q,c(s),x)}y.value=i(y.value,w,r);var u=t.className;if(!u.match("(\\s|^)(language-)?"+v+"(\\s|$)")){u=u?(u+" "+v):v}if(/MSIE [678]/.test(navigator.userAgent)&&t.tagName=="CODE"&&t.parentNode.tagName=="PRE"){s=t.parentNode;var p=document.createElement("div");p.innerHTML="<pre><code>"+y.value+"</code></pre>";t=p.firstChild.firstChild;p.firstChild.cN=s.cN;s.parentNode.replaceChild(p.firstChild,s)}else{t.innerHTML=y.value}t.className=u;t.result={language:v,kw:y.keyword_count,re:y.r};if(y.second_best){t.second_best={language:y.second_best.language,kw:y.second_best.keyword_count,re:y.second_best.r}}}function o(){if(o.called){return}o.called=true;var r=document.getElementsByTagName("pre");for(var p=0;p<r.length;p++){var q=b(r[p]);if(q){n(q,hljs.tabReplace)}}}function l(){if(window.addEventListener){window.addEventListener("DOMContentLoaded",o,false);window.addEventListener("load",o,false)}else{if(window.attachEvent){window.attachEvent("onload",o)}else{window.onload=o}}}var e={};this.LANGUAGES=e;this.highlight=d;this.highlightAuto=g;this.fixMarkup=i;this.highlightBlock=n;this.initHighlighting=o;this.initHighlightingOnLoad=l;this.IR="[a-zA-Z][a-zA-Z0-9_]*";this.UIR="[a-zA-Z_][a-zA-Z0-9_]*";this.NR="\\b\\d+(\\.\\d+)?";this.CNR="\\b(0[xX][a-fA-F0-9]+|(\\d+(\\.\\d*)?|\\.\\d+)([eE][-+]?\\d+)?)";this.BNR="\\b(0b[01]+)";this.RSR="!|!=|!==|%|%=|&|&&|&=|\\*|\\*=|\\+|\\+=|,|\\.|-|-=|/|/=|:|;|<|<<|<<=|<=|=|==|===|>|>=|>>|>>=|>>>|>>>=|\\?|\\[|\\{|\\(|\\^|\\^=|\\||\\|=|\\|\\||~";this.ER="(?![\\s\\S])";this.BE={b:"\\\\.",r:0};this.ASM={cN:"string",b:"'",e:"'",i:"\\n",c:[this.BE],r:0};this.QSM={cN:"string",b:'"',e:'"',i:"\\n",c:[this.BE],r:0};this.CLCM={cN:"comment",b:"//",e:"$"};this.CBLCLM={cN:"comment",b:"/\\*",e:"\\*/"};this.HCM={cN:"comment",b:"#",e:"$"};this.NM={cN:"number",b:this.NR,r:0};this.CNM={cN:"number",b:this.CNR,r:0};this.BNM={cN:"number",b:this.BNR,r:0};this.inherit=function(r,s){var p={};for(var q in r){p[q]=r[q]}if(s){for(var q in s){p[q]=s[q]}}return p}}();hljs.LANGUAGES.cpp=function(){var a={keyword:{"false":1,"int":1,"float":1,"while":1,"private":1,"char":1,"catch":1,"export":1,virtual:1,operator:2,sizeof:2,dynamic_cast:2,typedef:2,const_cast:2,"const":1,struct:1,"for":1,static_cast:2,union:1,namespace:1,unsigned:1,"long":1,"throw":1,"volatile":2,"static":1,"protected":1,bool:1,template:1,mutable:1,"if":1,"public":1,friend:2,"do":1,"return":1,"goto":1,auto:1,"void":2,"enum":1,"else":1,"break":1,"new":1,extern:1,using:1,"true":1,"class":1,asm:1,"case":1,typeid:1,"short":1,reinterpret_cast:2,"default":1,"double":1,register:1,explicit:1,signed:1,typename:1,"try":1,"this":1,"switch":1,"continue":1,wchar_t:1,inline:1,"delete":1,alignof:1,char16_t:1,char32_t:1,constexpr:1,decltype:1,noexcept:1,nullptr:1,static_assert:1,thread_local:1,restrict:1,_Bool:1,complex:1},built_in:{std:1,string:1,cin:1,cout:1,cerr:1,clog:1,stringstream:1,istringstream:1,ostringstream:1,auto_ptr:1,deque:1,list:1,queue:1,stack:1,vector:1,map:1,set:1,bitset:1,multiset:1,multimap:1,unordered_set:1,unordered_map:1,unordered_multiset:1,unordered_multimap:1,array:1,shared_ptr:1}};return{dM:{k:a,i:"</",c:[hljs.CLCM,hljs.CBLCLM,hljs.QSM,{cN:"string",b:"'\\\\?.",e:"'",i:"."},{cN:"number",b:"\\b(\\d+(\\.\\d*)?|\\.\\d+)(u|U|l|L|ul|UL|f|F)"},hljs.CNM,{cN:"preprocessor",b:"#",e:"$"},{cN:"stl_container",b:"\\b(deque|list|queue|stack|vector|map|set|bitset|multiset|multimap|unordered_map|unordered_set|unordered_multiset|unordered_multimap|array)\\s*<",e:">",k:a,r:10,c:["self"]}]}}}();hljs.LANGUAGES.r={dM:{c:[hljs.HCM,{cN:"number",b:"\\b0[xX][0-9a-fA-F]+[Li]?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+(?:[eE][+\\-]?\\d*)?L\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\b\\d+\\.(?!\\d)(?:i\\b)?",e:hljs.IMMEDIATE_RE,r:1},{cN:"number",b:"\\b\\d+(?:\\.\\d*)?(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"number",b:"\\.\\d+(?:[eE][+\\-]?\\d*)?i?\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"keyword",b:"(?:tryCatch|library|setGeneric|setGroupGeneric)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\.",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\.\\.\\d+(?![\\w.])",e:hljs.IMMEDIATE_RE,r:10},{cN:"keyword",b:"\\b(?:function)",e:hljs.IMMEDIATE_RE,r:2},{cN:"keyword",b:"(?:if|in|break|next|repeat|else|for|return|switch|while|try|stop|warning|require|attach|detach|source|setMethod|setClass)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"literal",b:"(?:NA|NA_integer_|NA_real_|NA_character_|NA_complex_)\\b",e:hljs.IMMEDIATE_RE,r:10},{cN:"literal",b:"(?:NULL|TRUE|FALSE|T|F|Inf|NaN)\\b",e:hljs.IMMEDIATE_RE,r:1},{cN:"identifier",b:"[a-zA-Z.][a-zA-Z0-9._]*\\b",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"<\\-(?!\\s*\\d)",e:hljs.IMMEDIATE_RE,r:2},{cN:"operator",b:"\\->|<\\-",e:hljs.IMMEDIATE_RE,r:1},{cN:"operator",b:"%%|~",e:hljs.IMMEDIATE_RE},{cN:"operator",b:">=|<=|==|!=|\\|\\||&&|=|\\+|\\-|\\*|/|\\^|>|<|!|&|\\||\\$|:",e:hljs.IMMEDIATE_RE,r:0},{cN:"operator",b:"%",e:"%",i:"\\n",r:1},{cN:"identifier",b:"`",e:"`",r:0},{cN:"string",b:'"',e:'"',c:[hljs.BE],r:0},{cN:"string",b:"'",e:"'",c:[hljs.BE],r:0},{cN:"paren",b:"[[({\\])}]",e:hljs.IMMEDIATE_RE,r:0}]}};
+hljs.initHighlightingOnLoad();
+</script>
+
+
+
+<style type="text/css">
+body, td {
+   font-family: sans-serif;
+   background-color: white;
+   font-size: 13px;
+}
+
+body {
+  max-width: 800px;
+  margin: auto;
+  padding: 1em;
+  line-height: 20px;
+}
+
+tt, code, pre {
+   font-family: 'DejaVu Sans Mono', 'Droid Sans Mono', 'Lucida Console', Consolas, Monaco, monospace;
+}
+
+h1 {
+   font-size:2.2em;
+}
+
+h2 {
+   font-size:1.8em;
+}
+
+h3 {
+   font-size:1.4em;
+}
+
+h4 {
+   font-size:1.0em;
+}
+
+h5 {
+   font-size:0.9em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: rgb(50%, 0%, 50%);
+}
+
+pre, img {
+  max-width: 100%;
+}
+pre {
+  overflow-x: auto;
+}
+pre code {
+   display: block; padding: 0.5em;
+}
+
+code {
+  font-size: 92%;
+  border: 1px solid #ccc;
+}
+
+code[class] {
+  background-color: #F8F8F8;
+}
+
+table, td, th {
+  border: none;
+}
+
+blockquote {
+   color:#666666;
+   margin:0;
+   padding-left: 1em;
+   border-left: 0.5em #EEE solid;
+}
+
+hr {
+   height: 0px;
+   border-bottom: none;
+   border-top-width: thin;
+   border-top-style: dotted;
+   border-top-color: #999999;
+}
+
+@media print {
+   * {
+      background: transparent !important;
+      color: black !important;
+      filter:none !important;
+      -ms-filter: none !important;
+   }
+
+   body {
+      font-size:12pt;
+      max-width:100%;
+   }
+
+   a, a:visited {
+      text-decoration: underline;
+   }
+
+   hr {
+      visibility: hidden;
+      page-break-before: always;
+   }
+
+   pre, blockquote {
+      padding-right: 1em;
+      page-break-inside: avoid;
+   }
+
+   tr, img {
+      page-break-inside: avoid;
+   }
+
+   img {
+      max-width: 100% !important;
+   }
+
+   @page :left {
+      margin: 15mm 20mm 15mm 10mm;
+   }
+
+   @page :right {
+      margin: 15mm 10mm 15mm 20mm;
+   }
+
+   p, h2, h3 {
+      orphans: 3; widows: 3;
+   }
+
+   h2, h3 {
+      page-break-after: avoid;
+   }
+}
+</style>
+
+
+
+</head>
+
+<body>
+<p><br>
+<br>
+<img src = 'http://bit.ly/mxm_mmpc_png', width = '96%' >
+<br>
+<br></p>
+
+<h1>Introduction: The MXM R package for Feature Selection</h1>
+
+<p>The <strong>MXM R Package</strong>, short for the latin <strong>&#39;Mens ex Machina&#39;</strong> ( Mind from the Machine ), is a collection of utility functions for feature selection, cross validation and Bayesian Networks. The package supports conditional independence tests for various combinations of <strong>target</strong> and <strong>predictor</strong> variables (continuous, categorical). <code>MXM</code> offers many feature selection algorithms focused on providing one or more minimal feature subsets, refered also as variable signatures, that can be used to improve the performance of downstream analysis tasks such as regression and classification, by excluding irrelevant and redundant variables. In this tutorial we will learn how to use the <strong>MMPC</strong> algorithm.</p>
+
+<h1>Overview of the MMPC algorithm</h1>
+
+<p><strong>MMPC</strong> stands for <strong>Max-Min Parents and Children</strong>, a constraint based feature selection algorithm, as first described by Brown, Tsamardinos and  Aliferis, (2004). Parents and Children refers to the fact that the algorithm identifies the parents and children of the variable of interest ( <em>target</em> ), assuming a Bayesian Network for all observed variables.  What it will not recover is the spouses of the children , and for this the <strong>FBED</strong> algorithmcan be applied The <strong>FBED</strong> algorithm is  also available in the <strong>MXM R package</strong> and can essentially recover the <strong>Markov Blanket</strong> of the variable of interest. For simplicity, we will use a dataset with fewer variables, but the algorithms perform especially well in datasets with very <strong>large feature space</strong>, such as in biomedical datasets (eg. <strong>millions</strong> of SNPs as variables in GWAS studies, <strong>thousands</strong> of genes in NGS <em>omics</em> datasets, etc). </p>
+
+<h2>Selecting the appropriate Conditional Independence Test</h2>
+
+<p>At its core, the <strong>MMPC</strong> algorithm performs multiple conditional independance tests, and progressively excludes irrelevant and/or redundant variables. The final variables that have &ldquo;survived&rdquo; through all those elimination stages, are the <strong>MMPC output signature</strong>.</p>
+
+<p>The selection of the appropriate conditional independence test is a crucial decision for the validity and success of downstream statistical analysis and machine learning tasks. Currently the <strong>MXM R package</strong>  supports nummerous tests for different combinations of <strong>target</strong> ( <em>dependent</em> ) and <strong>predictor</strong> ( <em>independent</em> ) variables. A detailed summary table to guide you through the selection of the most suitable test is included in <strong>MXM&#39;s</strong> reference manual ( <em>&ldquo;CondInditional independence tests&rdquo;</em> ), which can be found here: <a href="http://bit.ly/feature_selection_with_MXM_R_Package">http://bit.ly/feature_selection_with_MXM_R_Package</a>.</p>
+
+<h2>The <code>MMPC()</code> function:  Required and optional arguments</h2>
+
+<p>There are <strong>3</strong> mandatory arguments for the <code>MXM::MMPC()</code> function: <strong>1)</strong> an object with the <strong>target</strong> variable, <strong>2)</strong> one with the <strong>complete dataset</strong> but with the target variable removed and <strong>3)</strong> a <strong>conditional indepence test</strong>, selected by the reference manual table mentioned above. The <code>dataset</code> has to have the instances <strong>(N)</strong> as rows and the features <strong>(f)</strong> as columns. For the <code>target</code> and <code>dataset</code> it is recommended to also retain <code>colnames</code> and <code>rownames</code> information.</p>
+
+<p>Several hyper-parameters are also provided as optional arguments in the <code>MXM::MMPC()</code> function. In the following block, the function along with the most important hyperparameters are presented.</p>
+
+<pre><code class="r"># Overview the MXM::`MMPC()` function 
+
+mod &lt;- MXM::MMPC(
+       target,           # The target variable vector
+       dataset,          # The dataset with the target column removed
+       max_k = 3,        # The maximum size of the conditioning set to use 
+       threshold = 0.05, # level of alpha for statistical  significance
+       test = &#39;testIndFisher&#39;,   
+       ini = NULL,        # if TRUE, the calculated univariate associations
+                          # are stored for runtime efficiency in subsequent 
+                          # MMPC runs with diferent hyper-parameters.
+       hash =  TRUE,      # if TRUE, the calculated statistics are stored.
+       hashObject = NULL, # the mmpcobject from a previous run
+       ncores = 1,        # number of cores for parallel execution. 
+                          # Recommended for thousands of variables.
+       backward = TRUE)   # If TRUE, the backward phase
+                          # (or symmetry correction) is implemented.
+                          # Falsely included variables,
+                          # in the MMPC output signature are removed. 
+</code></pre>
+
+<p><br>
+<br></p>
+
+<h1>Applying the MMPC algorithm on the UCI wine dataset</h1>
+
+<p>For this tutorial we will use the UCI wine dataset. The dataset contains the results of a <strong>chemical analysis</strong> performed on <strong>3 different types of wines</strong> and includes  <strong>12 quality related characteristics</strong> plus the information of the <strong>wine class</strong> as the first attribute (<strong>Type</strong>: 1,2 or 3). More information about the wine dataset is available at the UCI repository.</p>
+
+<p>The following block installs the <strong>MXM package</strong>, takes care of package dependencies, downloads and then cleans the dataset for the subsequent steps. The categorical variable <em>(class information)</em> is omitted for this example and we retain only the numerical variables (continuous and count data). We will then apply the <strong>MMPC</strong> algorithm to acquire a <strong>minimal, highly relevant subset</strong> of variables that can be used to best model the <code>&quot;NonFlavanoids&quot;</code> content.</p>
+
+<p><strong>PACKAGE DEPENDENCIES and UCI WINE DATASET LOADING:</strong></p>
+
+<pre><code class="r"># 0. INSTALL and LOAD the MXM R Package:
+#install.packages(&#39;MXM&#39;, dependencies = TRUE )
+library(MXM)
+
+# 1. DOWNLOAD the wine dataset from UCI:
+URL  &lt;- &quot;ftp://ftp.ics.uci.edu/pub/machine-learning-databases/wine/wine.data&quot;
+wine &lt;-  read.csv(URL, header = FALSE) 
+
+
+# 2. SET variables&#39; names as header:
+colnames(wine) &lt;- c(&#39;Type&#39;, &#39;Alcohol&#39;, &#39;Malic&#39;, &#39;Ash&#39;, 
+                    &#39;Alcalinity&#39;, &#39;Magnesium&#39;, &#39;Phenols&#39;, 
+                    &#39;Flavanoids&#39;, &#39;Nonflavanoids&#39;, &#39;Proanthocyanins&#39;,
+                    &#39;Color&#39;, &#39;Hue&#39;, &#39;Dilution&#39;, &#39;Proline&#39;)
+
+# 3. REMOVE the 1st attribute, which is the class information:
+wine &lt;- wine[,-1] 
+
+# 4. PREVIEW UCI&#39;s wine dataset:
+head(wine, 2)
+</code></pre>
+
+<pre><code>##   Alcohol Malic  Ash Alcalinity Magnesium Phenols Flavanoids Nonflavanoids
+## 1   14.23  1.71 2.43       15.6       127    2.80       3.06          0.28
+## 2   13.20  1.78 2.14       11.2       100    2.65       2.76          0.26
+##   Proanthocyanins Color  Hue Dilution Proline
+## 1            2.29  5.64 1.04     3.92    1065
+## 2            1.28  4.38 1.05     3.40    1050
+</code></pre>
+
+<pre><code class="r"># The header should include the wine attributes sans the class labels, 
+# in the following order:
+
+# Alcohol | Malic | Ash | Alcalinity | Magnesium | Phenols | Flavanoids 
+# Nonflavanoids | Proanthocyanins | Color | Hue | Dilution | Proline 
+</code></pre>
+
+<h2>Exploratory Data Analysis: Inspecting the <code>wine</code> dataset</h2>
+
+<pre><code class="r"># 5. CHECK for missing or non-numeric values in the dataframe:
+
+sum(is.na(wine))
+</code></pre>
+
+<pre><code>## [1] 0
+</code></pre>
+
+<pre><code class="r">sum(is.nan(as.matrix(wine)))  #if 0, then No NAs, none NaNs, good to go!
+</code></pre>
+
+<pre><code>## [1] 0
+</code></pre>
+
+<p>Even if the dataset <strong>contains missing values</strong>, they will automatically be replaced by the current variable (column) mean value with an appropriate warning to the user after the execution. For optimal results, it is advised to use a more sophisticated <strong>imputation</strong> method according to your data&#39;s needs before running <strong><code>MMPC()</code></strong>.</p>
+
+<pre><code class="r"># 6. CHECK `wine` object&#39;s data type, dimensions:
+str(wine)
+</code></pre>
+
+<pre><code>## &#39;data.frame&#39;:    178 obs. of  13 variables:
+##  $ Alcohol        : num  14.2 13.2 13.2 14.4 13.2 ...
+##  $ Malic          : num  1.71 1.78 2.36 1.95 2.59 1.76 1.87 2.15 1.64 1.35 ...
+##  $ Ash            : num  2.43 2.14 2.67 2.5 2.87 2.45 2.45 2.61 2.17 2.27 ...
+##  $ Alcalinity     : num  15.6 11.2 18.6 16.8 21 15.2 14.6 17.6 14 16 ...
+##  $ Magnesium      : int  127 100 101 113 118 112 96 121 97 98 ...
+##  $ Phenols        : num  2.8 2.65 2.8 3.85 2.8 3.27 2.5 2.6 2.8 2.98 ...
+##  $ Flavanoids     : num  3.06 2.76 3.24 3.49 2.69 3.39 2.52 2.51 2.98 3.15 ...
+##  $ Nonflavanoids  : num  0.28 0.26 0.3 0.24 0.39 0.34 0.3 0.31 0.29 0.22 ...
+##  $ Proanthocyanins: num  2.29 1.28 2.81 2.18 1.82 1.97 1.98 1.25 1.98 1.85 ...
+##  $ Color          : num  5.64 4.38 5.68 7.8 4.32 6.75 5.25 5.05 5.2 7.22 ...
+##  $ Hue            : num  1.04 1.05 1.03 0.86 1.04 1.05 1.02 1.06 1.08 1.01 ...
+##  $ Dilution       : num  3.92 3.4 3.17 3.45 2.93 2.85 3.58 3.58 2.85 3.55 ...
+##  $ Proline        : int  1065 1050 1185 1480 735 1450 1290 1295 1045 1045 ...
+</code></pre>
+
+<pre><code class="r"># The output should be a datarame: 
+#&#39;data.frame&#39;:  178 obs. of  13 variables
+</code></pre>
+
+<h2>Preparing the <code>MMPC()</code> input objects: &#39;target&#39;, &#39;dataset&#39;</h2>
+
+<p>And now, we will tailor the <code>target</code> ( <em>non-flavanoids content variable</em> ) and the complete <code>dataset</code> objects to the the <code>MMPC()</code>&#39;s function needs. Both will be converted to <strong>matrices</strong>, using the built in function <code>as.matrix()</code> and we will make sure that the dataset matrix is given as instances (N) by features (f). After selecting the <strong>target variable</strong>, create a matrix that includes only the remaining variables. This would be the <code>dataset</code> input for the  <code>MMPC()</code> function. This is necessary to assure that the signature <strong>does not</strong> include the target variable.</p>
+
+<pre><code class="r"># 0. Exclude target variable column
+targetVariable &lt;- wine$Nonflavanoids
+targetVariable &lt;- NULL
+
+
+# 1. Convert dataframe to matrix:
+wine_dataset &lt;- as.matrix(wine[, -8])
+wine_dataset[, 12] &lt;- as.numeric(wine_dataset[, 12])
+head(wine_dataset, 2)
+</code></pre>
+
+<pre><code>##      Alcohol Malic  Ash Alcalinity Magnesium Phenols Flavanoids
+## [1,]   14.23  1.71 2.43       15.6       127    2.80       3.06
+## [2,]   13.20  1.78 2.14       11.2       100    2.65       2.76
+##      Proanthocyanins Color  Hue Dilution Proline
+## [1,]            2.29  5.64 1.04     3.92    1065
+## [2,]            1.28  4.38 1.05     3.40    1050
+</code></pre>
+
+<p>We check once more the dimension of our <code>dataset</code> object. We expect it to be in the form <strong>Instances x Features</strong>.</p>
+
+<pre><code class="r"># 2. Check dimensions of the wine_dataset
+# REMINDER: We need it as N x f    // N for instances, f or features
+
+dim(wine_dataset)
+</code></pre>
+
+<pre><code>## [1] 178  12
+</code></pre>
+
+<pre><code class="r"># The output should be 178 x 12, 
+#178 instances and 12 features; if so, we&#39;re good to go
+</code></pre>
+
+<p>If desired, you can allocate the <code>target</code> variable in a new data structure, merely for the purpose of keeping functions&#39; input easy to read.</p>
+
+<pre><code class="r"># 3. Select the target variable (`Nonflavanoids`) and store as a matrix:
+target_NonFlav &lt;- as.vector(wine$Nonflavanoids)
+str(target_NonFlav,2)
+</code></pre>
+
+<pre><code>##  num [1:178] 0.28 0.26 0.3 0.24 0.39 0.34 0.3 0.31 0.29 0.22 ...
+</code></pre>
+
+<p>After the brief <strong>EDA (Exploratory Data Analysis)</strong> of the UCI wine dataset, it&#39;s time to actually apply <code>MMPC</code>.
+For a comprehensive overview of the <strong>hyper-parameter options</strong> type <code>?MMPC</code> in your Rstudio console. Here, we have set <code>hash =  TRUE</code>, for faster runtimes in subsequent runs of the MMPC with different hyper-parameters. We have selected the  <code>testIndFisher</code> test which is the appropriate for our data, that we have retrieved from the <strong>Conditional Independece Tests</strong> cheatsheet from the MXM reference manual. The <code>backward = TRUE</code> was also used, for acquiring a minimal signature. All other parameters were left to default or the first run.</p>
+
+<h2>First run of <code>MMPC()</code></h2>
+
+<pre><code class="r"># MMPC on the wine dataset: 
+
+library(&#39;MXM&#39;)
+mmpcobject_wine_NonFlav &lt;- MXM::MMPC( target  = target_NonFlav,            
+                                       dataset = wine_dataset,            
+                                       max_k = 3,          
+                                       threshold = 0.05,                                         
+                                       test = &#39;testIndFisher&#39;,   
+                                       ini = NULL,                                                
+                                       hash =  TRUE,      
+                                       hashObject = NULL,                                        
+                                       ncores = 1,         
+                                       backward = TRUE)   
+</code></pre>
+
+<h2><code>MMPC()</code> output: The <code>mmpcobject</code> and the feature signature</h2>
+
+<p>Let&#39;s now explore the <strong>output</strong> of the <code>MMPC</code> function, the <strong>mmpcobject</strong>. The generic function <code>summary()</code> can be used to display the indices of the features that are included in the signature, and also contains information about the <code>MMPC()</code> run, such as the <strong>selected hyperparameters, execution runtime and also statistics</strong> about the distribution of the p-values from the performed tests. For more specific information, you can access <code>the mmpcobject</code>  fields with the <code>@</code> operator, the operator for accessing <strong>S4 class objects in R</strong> . This is essentially the same as using the dollar operator  <code>$</code> for accessing <strong>R5 class objects</strong> &#39; slots, typically used with dataframes for example. The fields contain the  output results of the <strong><code>MMPC()</code></strong> run and also two lists that can be re-used for subsequent <strong>MMPC</strong> runs for computation time efficiency.</p>
+
+<p>Below, we can see the two objects that facilitate the computation time efficiency in the <code>MMPC()</code> re-runs.  After running <strong>MMPC</strong>_ with some hyper-parameters you might want to run the algorithm again with different hyper-parameters (<code>max_k</code> for example). To avoid calculating the univariate associations (first step of MMPC) again, you can take the list <code>univ</code> from the first run and provide it as input to the argument <code>ini</code> in the subsequent runs  the algorithm. This can speed up the second run (and subequent runs of course) up to <strong>50%</strong>, which is crucial if you are handling datasets with a very high number of features.</p>
+
+<pre><code class="r"># Cache of the stats calculated in the MMPC run
+str(mmpcobject_wine_NonFlav@hashObject) 
+</code></pre>
+
+<pre><code>## List of 2
+##  $ stat_hash  :Class &#39;Hash&#39; &lt;environment: 0x000000001ea53628&gt; 
+##  $ pvalue_hash:Class &#39;Hash&#39; &lt;environment: 0x000000001ea53270&gt;
+</code></pre>
+
+<pre><code class="r"># a list with the univariate associations
+str(mmpcobject_wine_NonFlav@univ)        
+</code></pre>
+
+<pre><code>## List of 2
+##  $ stat  : num [1:12] -2.08 3.99 2.49 5.01 -3.47 ...
+##  $ pvalue: num [1:12] -3.24 -9.25 -4.3 -13.56 -7.32 ...
+</code></pre>
+
+<p>Let&#39;s also save the <code>runtime</code> of the first MMPC run in a variable, to compare later.</p>
+
+<pre><code class="r">execution_time_1st_MMPC_run &lt;- mmpcobject_wine_NonFlav@runtime
+execution_time_1st_MMPC_run
+</code></pre>
+
+<pre><code>##    user  system elapsed 
+##    0.02    0.00    0.02
+</code></pre>
+
+<h2><code>MMPC()</code> subsequent run: Efficiency with the <code>ini</code> and <code>hashObject</code> arguments</h2>
+
+<p>Now, we can run <code>MMPC()</code> again to check how we can use the <code>hashObject</code> and <code>univ</code> lists to maximize runtime efficiency when multiple runs are requirted. </p>
+
+<pre><code class="r"># MMPC on the wine dataset: 
+
+library(&#39;MXM&#39;)
+mmpcobject_2nd_run &lt;- MXM::MMPC(target  = target_NonFlav,            
+                                 dataset = wine_dataset  ,            
+                           # it was set to 3 in the 1st run 
+                           max_k = 5, 
+                           # it was set to 0.05 in the 1st run
+                           threshold = 0.01, 
+                           test = &#39;testIndFisher&#39;,
+                           #the cached univariate tests
+                           ini = mmpcobject_wine_NonFlav@univ,
+                           # cached stats, p-values
+                           hashObject = mmpcobject_wine_NonFlav@hashObject)  
+</code></pre>
+
+<p>We used the <code>stored stats, p-values and univariate tests</code> performed in the first run for avoiding redundant calculations. 
+Our example dataset is very small to highlight the impact of such an implementation in  the algorithm, but let&#39;s compare the runtimes for first and second run of <code>MMPC()</code>. </p>
+
+<pre><code class="r">execution_time_2nd_MMPC_run &lt;- mmpcobject_2nd_run@runtime
+
+execution_time_1st_MMPC_run
+</code></pre>
+
+<pre><code>##    user  system elapsed 
+##    0.02    0.00    0.02
+</code></pre>
+
+<pre><code class="r">execution_time_2nd_MMPC_run
+</code></pre>
+
+<pre><code>##    user  system elapsed 
+##    0.02    0.00    0.01
+</code></pre>
+
+<p>Even in our small wine dataset, the difference in runtime is impressive. <code>MMPC</code> is designed for, and actually shines in high feature space datasets, such as those in the domains of computer vision and -omics approaches in Life Sciences. </p>
+
+<h2>Grid search for hyperparameter tuning: <code>the mmpc.path()</code> function</h2>
+
+<p>In the spirit of automation and performance efficiency, it would be an impossible task to manually search for the optimal set of hyper-parameters. Thus, the <code>MXM</code>  package supports a grid search function, named <code>mmpc.path</code>. The function returns an object that includes matrices with the following information that can be used for selecting the optimal configuration. </p>
+
+<pre><code>bic: matrix with the BIC values of the final fitted model based on the selected variables identified by each combination of the hyper-parameters.
+</code></pre>
+
+<pre><code>size:   matrix with the legnth of the selected variables identified by each configuration of MMPC.
+</code></pre>
+
+<pre><code>variables: A list containing the variables from each configuration of MMPC
+</code></pre>
+
+<pre><code>runtime: The run time of the function
+</code></pre>
+
+<p>The desired hyperparameters to be checked can be given as vectors in the relative argument.</p>
+
+<pre><code class="r"># Grid Search for MMPC hyper-parameter tuning 
+
+library(&#39;MXM&#39;)
+mmpcGridSearch &lt;- MXM::mmpc.path(
+                  target  = target_NonFlav,            
+                  dataset = wine_dataset,            
+                  max_ks = c(3,4,5,6),  # a vector of k to try
+                  alphas = NULL,   # a vector of thresholds; 
+                                        # If NULL, 0.1, 0.05 and 0.01 
+                                        # will be tested.
+                  test = &#39;testIndFisher&#39;,   
+                  ncores = 1)
+</code></pre>
+
+<p>We can acces the <code>mmpc.path()</code> objects using the dollar <code>$</code> operator and then use the generic <code>which</code> function to retrieve the lowest value for BIC and the repsective hyper-parameters. </p>
+
+<pre><code class="r">BIC_results &lt;- as.data.frame(mmpcGridSearch$bic)
+head(BIC_results, 4)
+</code></pre>
+
+<pre><code>##              max_k=6   max_k=5   max_k=4   max_k=3
+## alpha=0.1  -288.7666 -288.7666 -288.7666 -288.7666
+## alpha=0.05 -288.7666 -288.7666 -288.7666 -288.7666
+## alpha=0.01 -286.5281 -286.5281 -286.5281 -286.5281
+</code></pre>
+
+<pre><code class="r"># We can retrieve the indices of the minimum BIC values:
+which(BIC_results == min(BIC_results), arr.ind = TRUE)
+</code></pre>
+
+<pre><code>##            row col
+## alpha=0.1    1   1
+## alpha=0.05   2   1
+## alpha=0.1    1   2
+## alpha=0.05   2   2
+## alpha=0.1    1   3
+## alpha=0.05   2   3
+## alpha=0.1    1   4
+## alpha=0.05   2   4
+</code></pre>
+
+<p>Above we observe that the highest alpha level, 0.1, is the one with the <strong>lowest BIC</strong>. However, since the difference is miniscule in the BIC change, we will select a lower alpha level, to avoid including false positives in our model.</p>
+
+<p>We can display also the <code>size</code> of the selected signatures, which is the number variables the signature of ech configuration contains.</p>
+
+<pre><code class="r">size_of_signature_results &lt;- as.data.frame(mmpcGridSearch$size)
+head(size_of_signature_results, 4)
+</code></pre>
+
+<pre><code>##            max_k=6 max_k=5 max_k=4 max_k=3
+## alpha=0.1        4       4       4       4
+## alpha=0.05       4       4       4       4
+## alpha=0.01       2       2       2       2
+</code></pre>
+
+<pre><code class="r"># We can retrieve the indices of the maximum subset:
+which(size_of_signature_results == max(size_of_signature_results), arr.ind = TRUE)
+</code></pre>
+
+<pre><code>##            row col
+## alpha=0.1    1   1
+## alpha=0.05   2   1
+## alpha=0.1    1   2
+## alpha=0.05   2   2
+## alpha=0.1    1   3
+## alpha=0.05   2   3
+## alpha=0.1    1   4
+## alpha=0.05   2   4
+</code></pre>
+
+<p>We can also preview, the indices of the actual variables that were included in the signature in each configuration:</p>
+
+<pre><code class="r">head(mmpcGridSearch$variables, 4)
+</code></pre>
+
+<pre><code>## $`alpha=0.1 &amp; max_k=6`
+## [1]  4  5  7 11
+## 
+## $`alpha=0.1 &amp; max_k=5`
+## [1]  4  5  7 11
+## 
+## $`alpha=0.1 &amp; max_k=4`
+## [1]  4  5  7 11
+## 
+## $`alpha=0.1 &amp; max_k=3`
+## [1]  4  5  7 11
+</code></pre>
+
+<p>Let&#39;s now get back at our initial <code>MMPC()</code> run, and explore the output summary:</p>
+
+<pre><code class="r">summary(mmpcobject_wine_NonFlav)
+</code></pre>
+
+<pre><code>##     Length      Class       Mode 
+##          1 MMPCoutput         S4
+</code></pre>
+
+<p>We can retrieve the selected <strong>MMPC signature</strong>, by choosing <code>selectedVarsOrder</code> from the MMPC output object; this way, the features are printed based on highest statistical significance. </p>
+
+<pre><code class="r">mmpcobject_wine_NonFlav@selectedVarsOrder
+</code></pre>
+
+<pre><code>## [1]  7  4  5 11
+</code></pre>
+
+<pre><code class="r"># The signature should include the variables with indices 7, 4, 5
+</code></pre>
+
+<p>We can retrieve the <strong>names of the features</strong> in the signature by selecting the <code>colnames</code> with the above indices from the <code>dataset</code> provided as input in the <code>MMPC()</code> function. </p>
+
+<pre><code class="r">colnames(wine_dataset)[7]
+</code></pre>
+
+<pre><code>## [1] &quot;Flavanoids&quot;
+</code></pre>
+
+<pre><code class="r">colnames(wine_dataset)[4]
+</code></pre>
+
+<pre><code>## [1] &quot;Alcalinity&quot;
+</code></pre>
+
+<pre><code class="r">colnames(wine_dataset)[5]
+</code></pre>
+
+<pre><code>## [1] &quot;Magnesium&quot;
+</code></pre>
+
+<p>The <code>MMPC()</code> signature, highlights the <code>&quot;Flavanoids&quot;</code>, <code>&quot;Alcalinity&quot;</code> and  <code>&quot; Magnesium&quot;</code> content as variables of high importance in relation to our selected target variable <code>&quot;NonFlavanoids&quot;</code> content.</p>
+
+<p>We can actually create a <strong>regression model</strong>, using the above signature variables and check how the model performs. We will call the <code>mmpc.model</code> function and use the <code>mmpcObject</code> from the <code>MMPC()</code> run above, as input. For a more detailed overview the the function <code>mmpc.model()</code>, you can type<code>&quot;?mmpc.model&quot;</code> in your rstudio console.</p>
+
+<pre><code class="r"># MODEL ESTIMATES USING MMPC&#39;S FEATURE SUBSET AS PrEDICTORs 
+mmpcmodel_wine_NonFlav&lt;- mmpc.model(
+                                   target = target_NonFlav, 
+                                   dataset = wine_dataset,
+                                   wei = NULL, 
+                                   mmpcObject = mmpcobject_wine_NonFlav, 
+                                   test = &#39;testIndFisher&#39;)
+
+summary(mmpcmodel_wine_NonFlav) ; 
+</code></pre>
+
+<pre><code>##           Length Class  Mode   
+## mod       12     lm     list   
+## signature  5     -none- numeric
+</code></pre>
+
+<pre><code class="r">mmpcmodel_wine_NonFlav$ypografi
+</code></pre>
+
+<pre><code>## NULL
+</code></pre>
+
+<p>The <strong>MMPC</strong> algorithm follows a forward-backward filter approach for feature selection in order to provide a minimal, highly-predictive feature subset of a high dimensional dataset. The <code>max_k</code> hyper-parameter dictates the maximum number of variables as a conditioning set to use in the conditioning independence test. In our example, 12 model where built in the process, amongst them also the one with the final selected features as variables.</p>
+
+<p>Above, the <code>ypografi</code> variable denotes the indices of the <strong>MMPC selected features</strong> and also the <strong>BIC (Bayesian Information Criterion)</strong> of the final model. If you are not familiar with BIC as a model selection criterion, you can type <code>?BIC</code> in your <strong>Rstudio</strong> console for a brief introduction. As a rough estimate, when comparing models of the same Y as target variable, the model with the lowest <strong>BIC</strong> is prefered.   Below, we will retrieve the <strong>beta Coefficients</strong> and the <strong>intercept</strong> for the selected model, so that we can write the actual formula for the regression model, for the <code>&quot;NonFlavanoids&quot;</code> as target variable. </p>
+
+<pre><code class="r">mmpcmodel_wine_NonFlav$mod
+</code></pre>
+
+<pre><code>## 
+## Call:
+## lm(formula = target ~ ., data = as.data.frame(dataset[, signature]), 
+##     weights = wei)
+## 
+## Coefficients:
+## (Intercept)   Flavanoids   Alcalinity    Magnesium     Dilution  
+##    0.549466    -0.029591     0.007240    -0.001543    -0.043972
+</code></pre>
+
+<p>Let the <code>&quot;NonFlavanoids&quot;</code> target variable, be <strong>Y</strong>, then the formula for the model can be written as follows:</p>
+
+<p><strong>Y =  -0.087194 + 0.032057 Alcalinity -0.006664 Magnesium  -0.236471 Flavanoids</strong></p>
+
+<h1>Optimized performance tips and tricks</h1>
+
+<h2>Permutation option</h2>
+
+<p>The <code>MXM</code> package offers a permutation version of the statistical tests, which is recommended for small sample size datasets.
+If you are working with very large datasets, in order to save computational time, there is a trick to avoind doing all permutations. As soon as the number of times the permuted test statistic is more than the observed test statistic is more than 50 (if threshold = 0.05 and R = 999), the p-value has exceeded the signifiance level (threshold value) and hence the predictor variable is not significant. There is no need to continue do the extra permutations, as a decision has already been made.</p>
+
+<p>The function <code>perm.</code>MMPC()<code>has the same arguments as the</code>MMPC()<code>function, with an additional option called</code>R which is the number of permutations.</p>
+
+<pre><code># TESTS WITH PERMUTATIONS:  
+
+library(&#39;MXM&#39;)
+permutation_MMPC_model &lt;- MXM::perm.mmpc (target_NonFlav,
+                                          wine_dataset,  
+                                          R = 999, # Number of permutations 
+                                          max_k      = 3, 
+                                          threshold  = 0.05, 
+                                          test       = &#39;permFisher&#39;, 
+                                          ncores     = 1,
+                                          backward   = FALSE)
+</code></pre>
+
+<h2>Choosing the appropriate <code>max_k</code> for the conditioning set</h2>
+
+<p>As a rule of thumb, when the sample size is rather small eg. &lt; 100, the default <code>max_k = 3</code> is recommended. In small feature space datasets, as for example in the case of the wine dataset the default option is also recommended. When working with high dimensional datasets (many hundreds to thousands of features), the following approximation can be used: </p>
+
+<p><code>max_k = floor(N/10)</code>
+where <strong>N</strong> is the number of instances.</p>
+
+<p>For example, in a <strong>gene expression dataset</strong>, where N = 100 and features = 50000, max_k = 100/10 = 10, could be used. For more information about this heuristic there is an interesting topic in stackoverflow <a href="http://bit.ly/stack_ovrflw_max_predictors_in_multi_regression">http://bit.ly/stack_ovrflw_max_predictors_in_multi_regression</a>.  </p>
+
+<h2>Parallel computing: Choose number of cores option</h2>
+
+<p>You can use more than one cores to speed up execution time. However, this only pays off when working with large datasets. For small datasets, like in our example <code>ncore = 1</code> is recommended.</p>
+
+<p>You are now ready to apply the <code>MMPC()</code> algorithm and explore your very own dataset! The <code>MXM</code> is under intensive development and will be regularly updated with new functionalities. For questions, algorithm requests and suggestions, do not hesitate to contact us at <strong><a href="mailto:mtsagris@uoc.gr">mtsagris@uoc.gr</a></strong>.</p>
+
+<h1>References</h1>
+
+<p>Lagani, V., Athineou, G., Farcomeni, A., Tsagris, M. &amp; Tsamardinos, I. Feature Selection with the R Package MXM: Discovering Statistically Equivalent Feature Subsets. J. Stat. Softw. 80, 1-25 (2017).</p>
+
+<p>Borboudakis, G. &amp; Tsamardinos, I. Forward-Backward Selection with Early Dropping. (2017).</p>
+
+<p>Tsamardinos, Brown and Aliferis (2006). The max-min hill-climbing Bayesian network structure learning algorithm. Machine learning, 65(1), 31-78.</p>
+
+<p>Brown, L. E., Tsamardinos, I., &amp; Aliferis, C. F. (2004). A novel algorithm for scalable and accurate Bayesian network learning. Medinfo, 711-715.</p>
+
+<p>Tsamardinos, I., Aliferis, C. F., &amp; Statnikov, A. (2003). Time and sample efficient discovery of Markov blankets and direct causal relations. In Proceedings of the ninth ACM SIGKDD international conference on Knowledge discovery and data mining (pp. 673-678). ACM.</p>
+
+<p>Statnikov, A. R., Tsamardinos, I., &amp; Aliferis, C. F. (2003). An Algorithm For Generation of Large Bayesian Networks.</p>
+
+<pre><code class="r">sessionInfo()
+</code></pre>
+
+<pre><code>## R version 3.6.0 (2019-04-26)
+## Platform: x86_64-w64-mingw32/x64 (64-bit)
+## Running under: Windows 10 x64 (build 17134)
+## 
+## Matrix products: default
+## 
+## locale:
+## [1] LC_COLLATE=C                  LC_CTYPE=Greek_Greece.1253   
+## [3] LC_MONETARY=Greek_Greece.1253 LC_NUMERIC=C                 
+## [5] LC_TIME=Greek_Greece.1253    
+## 
+## attached base packages:
+## [1] stats     graphics  grDevices utils     datasets  methods   base     
+## 
+## other attached packages:
+## [1] dplyr_0.8.1 MXM_1.4.4  
+## 
+## loaded via a namespace (and not attached):
+##  [1] Rfast2_0.0.2        tidyselect_0.2.5    xfun_0.7           
+##  [4] slam_0.1-45         sets_1.0-18         purrr_0.3.2        
+##  [7] splines_3.6.0       lattice_0.20-38     htmltools_0.3.6    
+## [10] survival_2.44-1.1   rlang_0.3.4         R.oo_1.22.0        
+## [13] nloptr_1.2.1        pillar_1.4.0        glue_1.3.1         
+## [16] R.utils_2.8.0       RcppZiggurat_0.1.5  foreach_1.4.4      
+## [19] R.cache_0.13.0      stringr_1.4.0       MatrixModels_0.4-1 
+## [22] bdsmatrix_1.3-3     R.methodsS3_1.7.1   visNetwork_2.0.6   
+## [25] htmlwidgets_1.3     codetools_0.2-16    evaluate_0.13      
+## [28] geepack_1.2-1       coxme_2.2-10        knitr_1.22         
+## [31] SparseM_1.77        doParallel_1.0.14   parallel_3.6.0     
+## [34] quantreg_5.38       markdown_0.9        Rfast_1.9.4        
+## [37] Rcpp_1.0.1          relations_0.6-8     jsonlite_1.6       
+## [40] R.rsp_0.43.1        lme4_1.1-21         digest_0.6.18      
+## [43] stringi_1.4.3       ordinal_2019.4-25   numDeriv_2016.8-1  
+## [46] grid_3.6.0          tools_3.6.0         magrittr_1.5       
+## [49] tibble_2.1.1        cluster_2.0.8       ucminf_1.1-4       
+## [52] bigmemory.sri_0.1.3 bigmemory_4.5.33    crayon_1.3.4       
+## [55] pkgconfig_2.0.2     MASS_7.3-51.4       Matrix_1.2-17      
+## [58] energy_1.7-5        iterators_1.0.10    assertthat_0.2.1   
+## [61] minqa_1.2.4         R6_2.4.0            boot_1.3-22        
+## [64] nnet_7.3-12         nlme_3.1-139        compiler_3.6.0
+</code></pre>
+
+</body>
+
+</html>

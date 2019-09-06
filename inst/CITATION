@@ -1,0 +1,20 @@
+bibentry(bibtype = "Article",
+  title        = "Feature Selection with the {R} Package {MXM}: Discovering 
+Statistically Equivalent Feature Subsets",
+  author       = c(person(given = "Vincenzo",
+                          family = "Lagani"),
+                   person(given = "Giorgos",
+                          family = "Athineou"),
+                   person(given = "Alessio",
+                          family = "Farcomeni"),
+                   person(given = "Michail",
+                          family = "Tsagris"),
+                   person(given = "Ioannis",
+                          family = "Tsamardinos")),
+  journal      = "Journal of Statistical Software",
+  year         = "2017",
+  volume       = "80",
+  number       = "7",
+  doi          = "10.18637/jss.v080.i07",
+  header       = "To cite MXM in publications use:"
+)

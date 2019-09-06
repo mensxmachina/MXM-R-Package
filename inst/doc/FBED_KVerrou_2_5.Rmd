@@ -1,0 +1,420 @@
+---
+title: "Tutorial: Feature selection with the FBED algorithm"
+author:
+- name: Kleio - Maria Verrou
+  affiliation:
+  - Medicine Department, University of Crete, Greece
+  - Mens ex Machina Group, Computer Science Department, University of Crete, Greece
+
+- name: Michail Tsagris
+  affiliation: Mens ex Machina Group, Computer Science Department, University of Crete, Greece
+  email: mtsagris@uoc.gr
+date: "`r Sys.Date()`"
+output:
+  BiocStyle::html_document:
+    toc_float: true
+  BiocStyle::pdf_document2: default
+
+vignette: |
+  %\VignetteIndexEntry{Tutorial: Feature selection with the FBED algorithm}
+  %\VignetteEngine{knitr::knitr}
+  %\VignetteEncoding{UTF-8}
+---
+
+<br>
+<br>
+<img src = 'https://s7.postimg.cc/wgjmt5i63/mxm_the_FBED_image_preview.png' width="500" height="1000" align="middle" />
+<br>
+<br> 
+
+
+# Introduction
+  
+  
+The MXM R Package, short for the latin 'Mens ex Machina' ( Mind from the Machine ), is a collection of utility functions for feature selection, cross validation and Bayesian Networks. MXM offers many feature selection algorithms focused on providing one or more minimal feature subsets, refered also as variable signatures, that can be used to improve the performance of downstream analysis tasks such as regression and classification, by excluding irrelevant and redundant variables.
+  
+In this tutorial we will learn how to use the *Forward Backward Early Dropping (FBED)* algorithm. The algorithm is a variation of the usual forward selection. At every step, the most significant variable enters the selected variables set. In addition, only the significant variables stay and are further examined. The non significant ones are dropped. This goes until no variable can enter the set. The user has the option to redo this step 1 or more times (the argument K). In the end, a backward selection is performed to remove falsely selected variables.
+  
+For simplicity, in this tutorial, we will use a dataset referred as **"The Wine Dataset"**. 
+
+# Loading Data
+**The Wine Dataset** contains the results of a chemical analysis of wines grown in a specific area of Italy. Three types of wine are represented in the 178 samples, with the results of 13 chemical analyses recorded for each sample. Note that the "Type" variable was transformed into a categorical variable.
+
+
+So, first of all, for this tutorial analysis, we are loading the 'MXM' library and 'dplyr' library for handling easier the dataset, but note that the second one is not necessary for the analysis.  
+
+```{r, warning =  FALSE, message = FALSE }
+
+### ~ ~ ~ Load Packages ~ ~ ~ ###
+library(MXM) 
+library(dplyr)
+
+```
+
+On a next step we are downloading and opening the dataset, defining also the column names.
+
+```{r}
+
+### ~ ~ ~ Load The Dataset ~ ~ ~ ###
+wine.url <- "ftp://ftp.ics.uci.edu/pub/machine-learning-databases/wine/wine.data"
+wine <- read.csv(wine.url,
+                 check.names = FALSE,
+                 header = FALSE) 
+head(wine)
+str(wine)
+colnames(wine) <- c('Type', 'Alcohol', 'Malic', 'Ash', 
+                    'Alcalinity', 'Magnesium', 'Phenols', 
+                    'Flavanoids', 'Nonflavanoids',
+                    'Proanthocyanins', 'Color', 'Hue', 
+                    'Dilution', 'Proline')
+```
+
+
+# FBED for Continuous
+
+For this tutorial example, we are going to apply the FBED algorithm on the above dataset, using as data and as target only continuous variables.   
+
+
+## Selecting Appropriate Conditional Independence Test   
+
+
+The selection of the appropriate conditional independence test is a crucial decision for the validity and success of downstream statistical analysis and machine learning tasks. Currently the __ ` MXM R package`__  supports numerous tests for different combinations of __target__ ( _dependent_ ) and __predictor__ ( _independent_ ) variables. A detailed summary table to guide you through the selection of the most suitable test can be found in __MXM's__ reference manual (p.21 _"CondInditional independence tests"_ ). 
+In our example we will use the __`MXMX::fbed.reg()`__, which is the implementation of the FBED algorithm and since we are going to examine only continuous variables, we will use the *Fisher's Independence Test*.
+
+
+## Creating Data & Target Matrices
+
+
+`dataset` - A numeric matrix (or a _data.frame_ in case of categorical predictors), containing the variables for performing the test. The rows should refer to the different samples and columns to the features. For the purposes of this example analysis, we are going to use only the continuous variables, therefore we are removing the "Type" variable from the dataset. Furthermore, we are removing the "Nonflavanoids" variable, because we will use it as target.
+
+
+```{r}
+### ~ ~ ~ Removing The Categorical ('Type') and The Target ('Nonflavanoids') Variables ~ ~ ~ ###
+
+wine_dataset <- dplyr::select(wine,
+                              -contains("Type"),
+                              -contains("Nonflavanoids")) 
+head(wine_dataset)
+```
+
+
+`target` -  The class variable including the values of the target variable. We should provide either a string, an integer, a numeric value, a vector, a factor, an ordered factor or a Surv object. For the purposes of this example analysis, we are going to use as the dependent variable "Nonflavanoids". 
+
+```{r}
+wine_target <- wine$Nonflavanoids
+head(wine_target)
+```
+
+
+##  Function's Arguments
+
+This is the first time that we are running the algorithm, so we are going to explain what each **Argument** refers to:
+  
+`target` : The class variable. Provide either a string, an integer, a numeric value, a vector, a factor, an ordered factor or a Surv object. As explained above, this will be the dependent variable. If the target is a single integer value or a string, it has to corresponds to the column number or to the name of the target feature in the dataset. *Here* we choose "Nonflavanoids".
+
+`dataset` : The dataset. Provide either a data frame or a matrix. If the dataset (predictor variables) contains missing (NA) values, they will automatically be replaced by the current variable (column) mean value with an appropriate warning to the user after the execution. *Here* we choose the whole wine dataset, except from the "Type" (categorical) and "Nonflavanoids" (target) variables.
+  
+`test` : The conditional independence test to use. Default value is NULL. *Here* since our dataset includes only continuous features (*remember*: Categorical variable "Type" was removed) and our dependent variable is also continuous, we choose 'testIndFisher'.
+For more information, about which test to use, please visit :  <https://www.rdocumentation.org/packages/MXM/versions/0.9.7/topics/CondInditional%20independence%20tests>. 
+  
+`threshold` : Threshold (suitable values in [0,1]) for the significance of the p-values. The default value is 0.05. *Here* we choose the default value 0.05.  
+  
+`wei` : A vector of weights to be used for weighted regression. The default value is NULL. It is not suggested when "robust" is set to TRUE. If you want to use the "testIndBinom", then supply the successes in the y and the trials here. *Here* we choose the default value NULL
+  
+`K` : How many times should the process be repeated? The default value is 0. *Here* we choose 3.
+  
+`method` : Do you want the likelihood ratio test to be performed ("LR" is the default value) or perform the selection using the "eBIC" criterion (BIC is a special case)? *Here* we choose BIC in the first example and LR for the second, in order to see the output differences.
+  
+`gam` : In case the method chosen is "eBIC", one can also specify the gamma parameter. The default value is "NULL", so that the value is automatically calculated. *Here*, although we choose BIC as selection criterion, we do not choose any gamma parameter.
+  
+`backward` : After the Forward Early Dropping phase, the algorithm proceeds with the usual Backward Selection phase. The default value is set to TRUE. It is advised to perform this step since some variables may be false positives and were wrongly selected. The backward phase using Likelihood Ratio test and eBIC are two different functions and can be called directly by the user. So, if you want for example to perform a backward regression with a different threshold value, just use these two functions separately. *Here* we set the backward argument as TRUE.
+
+
+
+##  Testing with eBIC
+```{r}
+### ~ ~ ~ Running FBED with eBIC ~ ~ ~ ###
+fbed_cont_eBIC <- MXM::fbed.reg(target     = wine_target,
+                                 dataset   = wine_dataset, 
+                                 test      = "testIndFisher", 
+                                 threshold = 0.05,
+                                 wei       = NULL,
+                                 K         = 10,
+                                 method    = "eBIC",
+                                 gam       = NULL,
+                                 backward  = TRUE)
+```
+
+
+##  Testing with LR
+
+
+```{r}
+### ~ ~ ~ Running FBED with LR ~ ~ ~ ###
+fbed_cont_LR <- MXM::fbed.reg(target       = wine_target,
+                                 datase    = wine_dataset, 
+                                 test      = "testIndFisher", 
+                                 threshold = 0.05,
+                                 wei       = NULL,
+                                 K         = 10,
+                                 method    = "LR",
+                                 gam       = NULL,
+                                 backward  = TRUE)
+```
+
+
+So, the algorithm run twice...
+Let's see what information we can take out of it. 
+
+
+## Comparing Outputs
+
+
+The main purpose of running FBED algorithm is to see which variables should be selected as important. The indices of those variables are stored in `res`. Furthermore, in this matrix we see their test statistic and the associated p-value.  
+
+```{r}
+### ~ ~ ~ eBIC results ~ ~ ~ ###
+fbed_cont_eBIC$res
+SelectedVars_names<-colnames(wine_dataset[fbed_cont_eBIC$res[,1]])
+SelectedVars_names
+```
+
+From eBIC, we get as significant the variables "Flavanoids", "Ash" and "Magnesium", while from LR ... 
+
+```{r}
+### ~ ~ ~ LR results ~ ~ ~ ###
+fbed_cont_LR$res
+SelectedVars_names<-colnames(wine_dataset[fbed_cont_LR$res[,1]])
+SelectedVars_names
+```
+
+... we get the three previous variables, plus the variable "Dilution". So, the two testing approaches do not differ so much. In this case, the eBIC criterion applied a more strict feature selection, by selecting only 3 variables, while LR returned one variable more.
+
+Since the function returns the variables sorted by their significance, we can easily see that the three variables chosen by both approaches are the most important. So, it depends on the initial question and dataset used to say whether the fourth variable should be used in the downstream analysis. 
+
+  
+And as you may imagine, you may also retrieve the information about the scores. They are all (sorted) in the second column. 
+``` {r}
+fbed_cont_eBIC$res[,2]
+fbed_cont_LR$res[,2]
+```
+
+Perfect! But we see that the function returned an object called `info`. What is this?  
+
+```{r}
+fbed_cont_eBIC$info
+```
+```{r}
+fbed_cont_LR$info
+```
+
+The `info` matrix describes the number of variables and the number of tests performed (or models fitted) at each round (remember this value of `K` that in this example we set equal to 10? *Here* it did not reach K=10 neither with eBIC nor with LR. This happened because there were no difference after the 4th (eBIC) or 3rd (LR) run, so the algorithm stopped running earlier). We see that that LR applied one iteration less. For each `K` the number of selected variables is returned together with the number of tests performed. Therefore, we see that in the first step, 3 variables were already chosen by LR. 
+
+
+Well, all this refers to the forward phase only. So, if the information about the forward step is appended in the `info` matrix, where can we find information about the backward phase?
+ 
+```{r}
+fbed_cont_eBIC$back.rem 
+fbed_cont_LR$back.rem 
+``` 
+
+  
+By calling the `back.rem`, the variables that have been removed in the backward phase are returned. We see that both approaches did not remove any "false positive" variable.
+
+In case we are interested in the number of models that were fitted in the backward phase, all we have to do is to look for the `back.n.tests` variable.
+
+```{r}
+fbed_cont_eBIC$back.n.tests 
+```  
+
+```{r}
+fbed_cont_LR$back.n.tests 
+```  
+  
+We see that LR applied one test more during the backward phase. This is expected, since this method chose 4 variables (instead of 3 with eBIC) and all 4 have been checked.
+  
+
+But which of the both approaches was quicker applied? 
+
+```{r}
+fbed_cont_eBIC$runtime 
+```  
+
+```{r}
+fbed_cont_LR$runtime 
+```  
+
+Since the dataset is small, we do not see any special runtime difference.
+
+# FBED for Categorical  
+
+On this step, will apply FBED for a Categorical variable, using only eBIC.
+
+## Selecting Appropriate Conditional Independence Test
+
+Since the variable is categorical - and more specific it is a factor with more than two levels (unordered) -and the features are continuous, according to __MXM's__ reference manual (p.21 _"CondInditional independence tests"_ ), we should use the Multinomial logistic regression ( 'testIndMultinom' ).
+
+## Creating Data & Target Matrices
+
+In this step, we keep the whole dataset, in order to show how to use the algorithm also without subtracting the initial matrix.
+
+```{r}
+### ~ ~ ~ Taking The Whole Dataset ~ ~ ~ ###
+wine_dataset <- dplyr::select(wine,
+                              -contains("Type")) 
+head(wine_dataset)
+
+wine_target <- as.factor(wine$Type)
+head(wine_target)
+```  
+
+
+## Setting the Arguments 
+
+```{r, message=FALSE}
+### ~ ~ ~ Running FBED For Categorical Variable with eBIC~ ~ ~ ###
+fbed_categorical_eBIC <- MXM::fbed.reg(target = wine_target,
+                                 dataset      = wine_dataset, 
+                                 test         = "testIndMultinom",
+                                 threshold    = 0.05,
+                                 wei          = NULL,
+                                 K            = 10,
+                                 method       = "eBIC",
+                                 gam          = NULL,
+                                 backward     = TRUE) 
+
+```  
+
+```{r, message=FALSE, warning=FALSE}
+### ~ ~ ~ Running FBED For Categorical Variable with LR~ ~ ~ ###
+fbed_categorical_LR <- MXM::fbed.reg(target = wine_target,
+                                 dataset    = wine_dataset, 
+                                 test       = "testIndMultinom",
+                                 threshold  = 0.05,
+                                 wei        = NULL,
+                                 K          = 10,
+                                 method     = "LR",
+                                 gam        = NULL,
+                                 backward   = TRUE) 
+
+```  
+
+So, the algorithm run once again...
+Let's see what information we can take out of it.
+
+## Comparing Outputs
+
+The main purpose of running FBED algorithm is to see which variables should be selected as  important. The indices of those variables are stored in `res`.
+
+```{r}
+### ~ ~ ~ eBIC results ~ ~ ~ ###
+fbed_categorical_eBIC$res
+SelectedVars_names<-colnames(wine_dataset[fbed_categorical_eBIC$res[,1]])
+SelectedVars_names
+```
+
+From eBIC, we get as significant the variables "Flavanoids", "Alcohol", "Proline", "Hue", while from LR ... 
+
+```{r}
+### ~ ~ ~ LR results ~ ~ ~ ###
+fbed_categorical_LR$res
+SelectedVars_names<-colnames(wine_dataset[fbed_categorical_LR$res[,1]])
+SelectedVars_names
+```
+  
+
+... exactly the same 4 variables were chosen. 
+  
+
+
+  
+What was stored this time in the `info` matrix?
+
+```{r}
+fbed_categorical_eBIC$info
+fbed_categorical_LR$info
+```
+
+As we see, both approaches needed 2 iterations. The only difference is that LR applied one test more. Well, this refers to the forward phase only and for each `K` the number of selected variables is returned together with the number of tests performed.
+  
+And now let us inspect the backward phase
+ 
+```{r}
+fbed_categorical_eBIC$back.rem 
+fbed_categorical_LR$back.rem 
+```
+  
+No variable was removed during the backward steps... 
+
+```{r}
+fbed_categorical_eBIC$back.n.tests 
+fbed_categorical_LR$back.n.tests 
+
+```  
+... and both approaches fitted 4 models during the backward phase
+
+
+And how quick has all this happened? 
+
+```{r}
+fbed_categorical_eBIC$runtime 
+fbed_categorical_LR$runtime 
+
+```    
+Really quick, since the dataset is small. 
+
+  
+# FBED for more than one K
+
+In case the user wants to run the FBED algorithm for more than one K and compare the differences after each iteration, instead of calling the function with K=0, K=1, K=2 and so on, there is the possibility of running fbed.reg with K=0:2. Then, the selected variables found at K=2, K=1 and K=0 are returned. In order to make this issue more clear, we are going to apply again the example given in ??3.4, but this time we will ask from the algorithm to check K = 0:5
+
+```{r}
+### ~ ~ ~ Running FBED For Many K ~ ~ ~ ###
+wine_dataset <- dplyr::select(wine,
+                              -contains("Type"),
+                              -contains("Nonflavanoids")) 
+wine_target <- wine$Nonflavanoids
+fbed_cont_eBIC_manyK <- MXM::fbed.reg(target = wine_target,
+                                 datase    = wine_dataset, 
+                                 test      = "testIndFisher", 
+                                 threshold = 0.05,
+                                 wei       = NULL,
+                                 K         = 0:5,
+                                 method    = "LR",
+                                 gam       = NULL,
+                                 backward  = TRUE)
+
+```  
+
+Looking inside the new object `fbed_cont_eBIC_manyK`, we can find all the information about each K separately. This information is stored in `$mod`, for example: 
+
+```{r}
+### ~ ~ ~ statistics about K=1 ~ ~ ~ ###
+fbed_cont_eBIC_manyK$mod$`K=1`
+```
+
+
+# Conclusion
+
+
+>Now you are ready to run your own analysis using MXM::FBED algorithm!   
+>Thank you for your attention.    
+>Hope that you found this tutorial helpful.    
+
+
+
+# Session Info {.unnumbered}  
+All analyses have been applied on:
+
+```{r}
+sessionInfo()
+```
+
+
+
+# References {.unnumbered}
+
+
+Borboudakis G. and Tsamardinos I. (2017). Forward-Backward Selection with Early Dropping. https://arxiv.org/pdf/1705.10770.pdf
+
+

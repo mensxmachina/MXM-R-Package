@@ -1,0 +1,636 @@
+\documentclass[a4paper,11pt]{article}
+
+%\VignetteIndexEntry{Guide on performing feature selection with the R package MXM}
+%\VignetteEngine{R.rsp::tex}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% declarations for jss.cls %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\usepackage{amsmath}
+\usepackage{epstopdf}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage[left=0.9in, right=0.9in, top=1in, bottom=1in, includefoot, headheight=13pt]{geometry}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{alltt}
+
+\linespread{1.2}
+
+
+\begin{document}
+
+\begin{center}
+\Large{Guide on performing feature selection with the R package MXM}
+\end{center}
+
+\vskip 1cm
+
+\begin{center}
+\Large{Michail Tsagris}
+\end{center}
+
+\vskip 2cm
+
+\begin{center}
+Abstract \\
+\end{center}  
+\textit{MXM} is a flexible R package offering many feature selection algorithms for predictive or diagnostic models. \textit{MXM} has a unique 
+advantage over other packages; it allows for a long and comprehensive list of types of target variable to be modeled; continuous, percentages, time to event 
+(survival), binary, nominal, ordinal, clustered, counts and left censored to name a few. In this paper we briefly discuss some of these algorithms, the different 
+types of data they can handle, and the relevant functions along with their input and output arguments. 
+
+
+\section{Introduction}
+Given a target (response or dependent) variable $Y$ of $n$ measurements and a set $X$ of $p$ features (predictor or independent variables) the problem of feature 
+(or variable) selection is to identify the minimal set of features with the highest predictive performance. In cases where $p>>n$, the selection process becomes 
+even harder, and in cases where $n$ is at the order of tens or hundreds of thousands, big data is such an example, the task becomes even more computationally demanding. 
+On the other hand, when $n$ is is small, a quite common phenomenon in datasets occurring in biomedical or clinical research, special treatment, such as re-sampling based
+ testing approaches for example, is required.
+
+There are many reasons why researchers and practitioners should perform feature selection \citep{tsamardinos2003c}. Many features may be expensive (and unnecessary) 
+to measure, especially in the clinical and medical domains. Parsimonious models are computationally cheaper and easier to understand and interpret. Future experiments 
+will benefit from prior feature selection tasks and give more insight about the problem of interest, its characteristics and structure. 
+
+Feature selection can also be used as a means of knowledge discovery and for gaining intuition on the data generation mechanisms. There is theoretical connection 
+between feature selection and the Bayesian (causal) network that describes best the data at hand \citep{tsamardinos2003c}. Following the Bayesian networks terminology, 
+the Markov Blanket of a variable $Y$ is defined as the minimal set of variables that renders all other variables conditionally independent of $Y$. That is, the Markov Blanket 
+of $Y$ carries all the necessary information about $Y$, and no other variable offers additional information about $Y$. Under certain broad conditions the Markov Blanket has been 
+shown to be the solution to the FS problem \citep{tsamardinos2003}. Identification of the Markov Blanket of the target variable is often the primary goal of FS and not the 
+predictive model per se \citep{borboudakis2017}. This is particularly true in medicine, where the features selected may direct future experiments and offer useful insight 
+on the problem of interest, its characteristics and structure.
+
+\textit{MXM} \cite{lagani2017} is an R package\footnote{\textit{MXM} was first launched in 12/5/2014 and its current version is 1.3.3 (30/3/2018).} that can be downloaded 
+from \href{https://cran.r-project.org/web/packages/MXM/index.html}{CRAN}. It contains many feature selection algorithms designed for small and large sample sized datasets. 
+\textit{MXM} offers (Bayesian) network construction as well, but in this paper we focus on its feature selection algorithms. For every algorithm, we discuss their criteria 
+for selecting features (statistical, information based, ad-hoc), computational tricks that can decrease execution time substantially, and share a comprehensive list that 
+summarizes the different types of data these algorithms can be used with. We show how to use some of these algorithms, and some extra useful functions, using real high 
+dimensional biological data. 
+
+The rest of the paper is organized as follows. The next Section presents the feature selection algorithms available in \textit{MXM} along with some brief discussion of 
+their properties and the types of data they can handle. Section 3 provides an overview of these algorithms in R, while Section 4 demonstrates some of these algorithms in R. 
+We perform a comparative analysis using gen expression data in Section 4 and Section 5 concludes the paper. 
+
+\section{Overview of the feature selection algorithms and types of data MXM can handle}
+
+MMPC \cite{tsamardinos2003b} and SES \cite{tsamardinos2012} are two examples of algorithms designed mainly for small sample sizes, whereas gOMP \cite{pati1993} and 
+FBED \cite{borboudakis2017} should be preferred for datasets with large sample sizes. Below we give an overview of all the available feature selection algorithms in MXM. 
+
+\subsection{Forward and backward search}
+The first, historically, feature selection algorithms are the forward search (FS) and backward search (BS) or backward elimination. FS's first step consists of finding 
+the single predictor variable, mostly associated with the target variable. The association is measured via fitting a regression model for each feature. The procedure continues 
+with the addition of the predictor variables (one at the time) whose contribution, given the selected variables, is significant (again by fitting a regression model for each non 
+selected predictor variable given the selected variables). BS on the other hand works the opposite way. It fits a regression model with all variables and then eliminates, one at 
+the time, the least important variables. Again, many regression models must be fitted at each step.  
+
+\subsection{IAMB}
+Incremental Association Markov Blanket (IAMB) \cite{tsamardinos2003} is a BN aspired algorithm which consists of two phases; The FS followed by a modified backward elimination. 
+Instead of removing the least significant  variable, among the non significant ones, at the time, IAMB removes all of the non significant ones at every step.  
+
+\subsection{FBED}
+The most recently suggested feature selection algorithm is Forward-Backward with Early Dropping (FBED) \cite{borboudakis2017} which is also BN inspired. The forward phase step 
+is the same as in the FS with the difference that non (statistically) significant variables are removed and not examined in the subsequent steps (the Early Dropping heuristic). 
+The process continues until no predictor variable can be selected or all of them have been removed. FBED discovers a subset of the MB, parents and children in specific. 
+
+Re-running the algorithm again, starting with the selected variables and examining all the rest, results in identifying the MB of the target variable \cite{borboudakis2017}, 
+spouses are now identified, while with more re-runs FBED identifies supersets of MB\footnote{Re-running the algorithm until no more variables can be included results in the MB 
+of a Maximal Ancestral Graph (MAG) \cite{borboudakis2017}, a broader class of BNs.} thus providing a broader set of variables of interests, which are also desirable in many 
+research fields. A BS is applied afterwards to remove any falsely selected variables. \cite{borboudakis2017} based upon experimental evaluations showed that FBED produced comparable results 
+to LASSO \cite{tibshirani1996}. 
+
+\subsection{MMPC and SES}
+Max-Min Parents and Children (MMPC) \cite{tsamardinos2003b} is a BN inspired algorithm which tries to identify a subset of the Markov Blanket, namely the parents and children only. 
+In low sample size situations, statistical tests have low power which, in conjunction with an increased number of a estimable parameters increase the probability of obtaining wrong 
+results. The basic principle of MMPC is to perform, more, statistical tests conditioning on subsets of the the selected variables, and hence estimate less parameters than the previous 
+algorithms. It also consists of a forward and backward search as well. The fact that it performs more tests does not make it computationally prohibitive, due to several computational 
+efficiency heuristics and tricks that have been employed, described later.
+
+A second advantage of MMPC is its rationale for choosing the next variable to include using the minimum of the maximum p-values. This has been proved to control the False Discovery Rate 
+\cite{tsamardinos2008} and also one can estimate it.  
+
+Its generalization, called SES (Statistically Equivalent Signatures) \cite{tsamardinos2012,lagani2017} builds upon the ideas of MMPC in order to return multiple (statistically equivalent) 
+sets of predictor variables. SES is one of the few feature selection algorithms suggested in the literature which find multiple sets of predictor variables. In essence, this can be found 
+to be of high importance, in cases where some variables are difficult or expensive to be tracked and measured, as for example some biomarkers of interest in terms of clinical research. 
+
+MMPC has been successfully applied to survival data \cite{lagani2010} and in the context of classification tasks \cite{lagani2013}. It has also been applied in integrative feature 
+selection where multiple independent datasets are available \cite{lagani2016}. SES was used in high dimensional data with repeated measurements \cite{tsagris2018} outperforming LASSO 
+algorithm \cite{groll2014} both in predictive performance and computational cost. Groll and Tutz's LASSO implementation \cite{groll2014,glmmlasso2015} has a computational limit in R, 
+but even for a few hundreds of variables it was shown to be computationally more expensive than SES (and of MMPC essentially).   
+
+\subsection{MMMB}
+Max-Min Markov Blanket (MMMB) \cite{tsamardinos2003b} was proposed as an improvement of MMPC, since it tries to identify the parents of the children discovered by MMPC. It repeatedly 
+performs MMPC on the each of the selected variables of MMPC, in order to identify the spouses of the target variable. 
+
+\subsection{gOMP}
+Orthogonal Matching Pursuit \cite{pati1993} is an ad hoc, or geometry based, forward procedure which does not rely on statistical tests. The search begins by selecting the predictor 
+variable mostly correlated with the target variable, i.e. the predictor variable whose angle with the target variable is minimum. A regression model is fitted and the residuals are 
+computed. The correlation between the residuals and the other predictor variables is calculated. The variable with the highest correlation (or smallest angle) is selected. A model is 
+fitted, residuals are computed and this process is repeated. The algorithm stops when the norm of the residuals is below a user-defined threshold, or when some other user-defined criterion 
+is satisfied. OMP is closely related to Forward Stepwise Regression \cite{weisberg1980} which is based on statistical tests, and also to Forward Stagewise Regression \cite{hastie2007}. 
+
+\citealp{blumensath2007} described some differences between OMP and the classical forward selection method. The main difference mentioned in their work, which is in fact the same difference 
+between OMP and FBED, is that OMP selects the new feature based on the inner product, i.e. the angle between the features and the current residual. On the contrary, FBED (and similar model 
+fitting algorithms) will select the feature with the smallest angle, followed by the projection of this feature onto the orthogonal subspace in such a way so as to maximize an objective function, 
+e.g. log-likelihood. \citealp{blumensath2007} made this difference clear using a graphical example.
+
+Our modification of OMP, called generalised OMP (gOMP) uses a adifferent stopping criterion. When a new feature is chosen for possible inclusion, the model with that feature is fitted 
+and the log-likelihood is calculated. If the increase in the log-likelihood values, between the current model and the previous model is above a certain threshold \footnote{An example of 
+the threshold is the $95\%$ quantile of the $\chi^2$ distribution, forming a hypothesis test at the $5\%$ significance level.}, the feature is selected, otherwise the whole process stops. 
+Furthermore, we have implemented gOMP (available in the \textit{MXM} R package) to accept a numerous types of outcome variables, including multi-class, survival, left censored, counts and 
+proportions to name a few. 
+
+\subsection{Time complexity of the algorithms}
+We measure the time complexity of the algorithm in terms of the number of performed tests. The number of tests FS performs is $p \cdot \left(s + 1\right)$ where $p$ is the number of 
+variables and $s$ the number of selected variables. BS on the other hand requires $p + p - 1 + .\ldots + p - s$ tests. IAMB requires $p \cdot \left(s + 1\right)$ tests for the forward 
+phase while its upper limit for the backward phase is the tests required by BS. FBED's time complexity is bounded (worst case scenario) by the complexity of FS + BS. 
+
+MMPC (and SES) share the same upper bounds for the time complexity. Each variable must be contrasted against each subset of the selected signature before being eliminated. This would 
+require a number of tests in the order of $O\left(p \cdot 2^s \right)$. However, we only allow conditioning upon subsets of the selected variables with maximum cardinality equal to $k$, 
+at each time, decreasing the complexity of the algorithm to $O\left(p \cdot s^k \right)$. This means that the algorithm can still require an exponential number of tests with respect to 
+the size of the selected signatures; however, in our experience the actual computational requirements of the algorithm are much lower, also due to the parsimonious signatures often retrieved. 
+
+Among all algorithms implemented in \textit{MXM}, gOMP is the fastest and computationally cheapest, since unlike all other aforementioned methods, a regression model is fitted only when 
+a variable is selected for possible inclusion. All other methods fit regression models every time a test is performed. In gOMP, only $s + 1$ regression models will be fitted. We must add 
+though that at each step, a vector of correlations is calculated, which however adds a small computational burden. This means, that the number of times parameters are estimated is the 
+same as in FS, yet correlations are easier to compute, than regression models, as they require less computations. 
+
+\subsection{Types of data \textit{MXM} can handle} \label{types}
+In this Section we describe a few types of target variables and their respective regression models suitable for each case. 
+
+\begin{enumerate}
+\item \textbf{Continuous} outcome variable (taking any value in the whole of $\mathbb{R}$) are handled with
+\begin{itemize}
+\item \textit{linear regression} 
+\item \textit{MM estimators} (linear regression robust to outliers) and 
+\item \textit{quantile (median) regression} (linear regression robust to outliers). 
+\item When the predictor variables are also continuous \textit{Pearson} correlation coefficient or 
+\item \textit{Spearman} correlation coefficient are faster alternatives. 
+\end{itemize}
+
+\item \textbf{Multivariate continuous outcomes} are handled with 
+\begin{itemize}
+\item \textit{multivariate linear regression}. 
+\item Compositional data \cite{ait2003} excluding 0 and 1 values are handled the same way since the additive log-ratio transformation is applied.
+\end{itemize}
+
+\item \textbf{Positive valued data} are modeled with 
+\begin{itemize}
+\item \textit{Gaussian regression with a log-link}, allowing for zero values or 
+\item \textit{Gamma regression}, excluding zero values. 
+\end{itemize}
+
+\item \textbf{Percentages}, are modeled by 
+\begin{itemize}
+\item \textit{Beta regression} excluding 0s and 1s. 
+\item Alternatively, one can apply the logit transformation and treat them as continuous and hence use all models mentioned in (1). 
+\item A more general (without making parametric assumptions and accepting 0s and 1s) is the \textit{quasi binomial regression}.
+\end{itemize}
+
+\item \textbf{Count data} are usually modeled by 
+\begin{itemize}
+\item \textit{negative binomial regression}. 
+\item Other options include the more restrictive \textit{Poisson regression} or 
+\item the more flexible, \textit{quasi Poisson regression}. 
+\item If an excessive number of zeros has been observed, \textit{zero inflated Poisson regression} should be used instead. 
+\end{itemize}
+
+\item \textbf{Binary, nominal or of ordinal scale} outcome variables, 
+\begin{itemize}
+\item require \textit{logistic, multinomial and ordinal regression} respectively. 
+\item If the predictor variables are also categorical, the $G^2$ test of independence can be used as well, which has the advantage over regression models that "captures" non linear dependencies as well. Its disadvantage is that it requires large sample sizes. 
+\end{itemize}
+
+\item \textbf{Success out of a number of trials} are modeled by \textit{binomial regression}.
+
+\item \textbf{Time to event} (usually right censored, survival) outcomes are handled with survival regression models, 
+\begin{itemize}
+\item \textit{Weibull regression} (parametric model), 
+\item \textit{exponential regression} (parametric model) or with 
+\item \textit{Cox regression} (semi-parametric regression model).
+\item \textit{Mixed effects Cox regression} (Cox regression for clustered data).
+\end{itemize}
+
+\item \textbf{Matched case-control studies} require conditional logistic regression. 
+
+\item \textbf{Left censored} outcomes are handled by Tobit regression.  
+
+\item \textbf{Repeated measurements}, over time for example, require parametric models such as 
+\begin{itemize}
+\item \textit{generalized linear mixed models} (GLMM) including  
+\begin{itemize}
+\item \textit{Gaussian regression}, 
+\item \textit{logistic regression}, 
+\item \textit{Poisson regression},
+\item \textit{Gamma regression}, 
+\item \textit{Gaussian regression with log-link} and
+\item \textit{ordinal regression} but with limited options. 
+\end{itemize}
+\item Distribution free models, such as \textit{generalized estimating equations} (GEE) is a competing to GLMM methodology.
+The GEE methodology available in \textit{MXM} is richer than GLMM; it includes the same regression models as GLMM and
+\begin{itemize}
+\item It offers more types of correlation structure (\textit{compound} and \textit{autoregressive}) and many ways of estimating the standard error of the regression coefficients (\textit{standard sandwich estimators}, \textit{jackknife} and \textit{approximate jackknife estimators}). 
+\end{itemize}
+\end{itemize}
+\item \textbf{Classification with longitudinal data}. This is the case when one wants to discriminate among two or more classes and the predictor variables consist of longitudinal data.
+
+\end{enumerate}
+
+\section{Overview of the algorithms in R}
+We will now show which are the relevant commands and discuss their input arguments and output. The types of tests we will briefly mention here are statistical (likelihood ratio test, 
+F test, Wald test, permutations based test) or information criteria (eBIC and BIC).
+
+At this point we should mention that before an algorithm is run, a check for missing data is performed and if there are any they are replaced by the variable's median value 
+(in case of continuous data) or by the variable's mode (in case of categorical data). In addition, variables with constant values (zero variance) are handled internally without 
+damaging the sequence of the variables.      
+
+With user-friendliness in mind, extra attention has been put in keeping the functions within the MXM package as consistent as the nature of the algorithms allows for, in terms of 
+syntax, required input objects and parameter arguments. 
+
+\subsection{MMPC}
+The function for MMPC is called as:
+
+\begin{alltt}
+\textbf{
+> MMPC(target, dataset, max_k, threshold, test, 
+ini, wei, user_test, hash, hashObject, ncores, 
+backward = FALSE) }
+\end{alltt} 
+
+Below we briefly explain some of these arguments. More information on all arguments is available at the \textit{MXM}'s \href{https://cran.r-project.org/web/packages/MXM/MXM.pdf}{reference manual}.
+
+\begin{itemize}
+\item{\textbf{test}:}
+The statistical test to use. Default value is NULL. In Section \ref{types} we listed the different types of target variables and the respective regression models. The names of the 
+tests here are connected with those regression models. Some example options are "testIndFisher" (Fisher test using the Pearson correlation) "testIndReg" (for linear regression), 
+"testIndPois" (Poisson regression). In general, the test for all algorithms, is termed "testInd..." followed by an acronym or the name of the regression model. The exception is with 
+"censIndCR", "censIndWR" and "censIndER" which are used for Cox, Weibull and exponential regression respectively.
+\item{\textbf{ini}:}
+This is a list with the univariate associations, the test statistic and its p-value. This can help avoid calculating the univariate associations, in case of a second run of MMPC or other 
+algorithms. For example, if you have ran FBED, you can take that list and plug it in here or in MMPC, or the other way round. This will speed up the second run (and subsequent runs), 
+especially in case of demanding regression models, such as GLMM or GEE.  
+\item{\textbf{user\_test}:}
+A user-defined conditional independence test (provide a closure type object). If the user wants to use his own test, he can pass the name of the function here. The function must accept 
+the same input arguments and return the same output as the test functions of \textit{MXM}.
+\item{\textbf{hash}:}
+A boolean variable which indicates whether (TRUE) or not (FALSE) to store the statistics calculated during SES execution in a hash-type object. 
+\item{\textbf{hashObject}:}
+A List with the hash objects generated in a previous run of SES or MMPC. Each time SES runs with "hash=TRUE" it produces a list of hashObjects that can be re-used in order to 
+speed up next runs of SES or MMPC. An important note is that the generated hashObjects should be used only when the same dataset is re-analyzed, possibly with different values of 
+\textbf{max\_k} and \textbf{threshold}. This computational trick can help save a significant amount of time in subsequent runs of MMPC or SES. 
+\end{itemize}
+
+The output of MMPC is long verbosed, as it contains the test statistic values and their corresponding p-values, both during execution of the algorithm and of the univariate associations. 
+The latter is stored in a list called \textit{univ} and can be passed on to other algorithms such as FBED. Other returned items include the \textit{selected variables}, the 
+\textit{statistically equivalent signatures} (if any), the \textbf{hashObject} and the \textit{number of tests performed} (if \textbf{hash} was set to TRUE), the natural logarithm 
+\textit{(maximum) p-value} of each performed test, the relevant \textit{test statistic value}, the \textit{execution time} and the \textbf{test} used. 
+
+MMPC (and SES) make use of statistical tests in order to include a variable. These tests are either the F-test or the likelihood ratio test depending on the regression model. We have also 
+implemented MMPC and SES with the Wald test, currently designed for continuous predictor variables only. The functions are called \textbf{waldMMPC} and \textbf{waldSES} and the names of the 
+tests to be passed in argument \textbf{test} are similar to all other functions, but begin with \textit{wald}: \textbf{waldMMReg}, \textbf{waldPois}, \textbf{waldLogistic} etc. 
+
+A third alternative, is to use permutation based statistical tests. In these tests, the p-value is evaluated using permutations (default value is 999). In order to decrease the computational 
+cost, we stop the the permutations once the p-value exceeds the threshold value. For example, if the threshold value is set to 0.05 and the number of permutations is equal to 999, if the 
+p-value after 51 permutations has exceeded 0.05 we do not perform the rest of the permutations. The names of the tests in this case are \textbf{permFisher}, \textbf{permReg}, 
+\textbf{permLogistic}, etc. and are passed to \textbf{permMMPC} or \textbf{permSES}.
+
+Generalized linear mixed models (GLMM) and GEE (for time course, longitudinal or clustered data) have their own functions, called \textbf{SES.temporal} and \textbf{SES.gee} respectively. 
+The signature is the same in all cases (GLMM, GEE, Wald based or permutation based MMPC and SES)  with the addition of some extra arguments. For the GEE here is an example of the extra arguments. 
+\begin{alltt}
+\textbf{
+> MMPC.gee(target, ..., correl = "exchangeable", 
+se = "jack", ncores) }
+\end{alltt}
+The user has the option to choose the correlation structure (\textit{correl}) and the type of estimation of the standard error of the regression coefficients (\textit{se}). The names 
+for GLMM and GEE are similar to MMPC. For example \textbf{testIndGLMMReg}, \textbf{testIndGLMMPois} and \textbf{testIndGEEReg}, \textbf{testIndGEEPois}.
+
+\subsection{FBED}
+The input arguments for FBED are different because of the nature of the algorithm.
+\begin{alltt}
+\textbf{
+> fbed.reg(target, dataset, test, threshold, wei, K, 
+method, gam, backward) }
+\end{alltt}
+
+Let us now briefly explain some of the input arguments.
+\begin{itemize}
+\item{\textbf{ini}:}
+If you already have the test statistics and the p-values of the univariate associations (the first step of FBED) supply them as a list with the names \textit{stat} and \textit{pvalue} 
+respectively. This is the same as the \textbf{ini} in SES. As mentioned before, this can be extracted from a SES or MMPC run, hence reducing the computational cost. In the case of 
+FBED having been called with eBIC as the criterion of inclusion (\textbf{method}=eBIC), then this is a list with one element, called \textit{ebic} and can only be used by FBED. 
+\item{\textbf{K}:}
+How many times should the process be repeated? The default value is 0. The user has the option to pass a range of values of K, such as \textit{0:4} in which case the algorithm will 
+return the selected variables for each value of K.
+\item{\textbf{method}:}
+This argument give the user the choice of the inclusion test. In case of statistical test (F-test or likelihood ratio test, whichever appropriate) the user should type "LR". For 
+information criteria, such as "eBIC" (extended BIC, \cite{chen2008}) or the usual BIC, the user should type "eBIC".
+\item{\textbf{gam}:}
+In case the method is chosen to be "eBIC" one can also specify the $\gamma$ parameter of the eBIC. The default value is "NULL", so that the value is automatically calculated. If 
+the user sets this argument equal to 0, the usual BIC is used.
+\end{itemize}
+
+In the case of GEE the command is called as
+\begin{alltt}
+\textbf{
+> fbed.gee.reg(target, dataset, id, ..., 
+correl = "exchangeable", se = "jack") }
+\end{alltt}
+
+The output of FBED depends upon whether the user has run FBED with a single value of K or not. In some, the univariate associations tests, the selected variables along with the 
+value of the selected criterion (statistical test or information criterion) and the running time are returned. Information about the number of selected variables and number of 
+tests performed for each value of K and in the case of more than one value of K, a list with information on each value of K is also returned.
+
+\subsection{gOMP}
+The command for gOMP is different than all the other commands, due to the nature of the algorithm. 
+\begin{alltt}
+\textbf{ 
+> gomp(target, dataset, tol, test) }
+\end{alltt}
+All arguments are the same as before, except for \textbf{tol}. This is the criterion to include a variable and is based upon the log-likelihood of the fitted regression model at 
+each time. If twice the difference between two successive log-likelihoods is less than the tolerance value the algorithm stops. A tolerance value equal to $3.84$ corresponds to0
+the log-likelihood ratio test, whereas a value of $3.84 + log(n)$, where $n$ is the sample size, corresponds to using BIC as the test of inclusion. There is no \textit{ini} 
+argument here due to the algorithm being very fast. 
+
+gOMP's output is very small and it includes the running time of the algorithm, the selected variables and the deviance or twice the log-likelihood of the model at each step. 
+
+\section{Demonstration of the algorithms using real data}
+We will demonstrate MMPC, FBED and gOMP using 2 real datasets \footnote{The case of SES, was covered in \cite{lagani2017}.}. The first dataset concerns breast cancer \cite{wang2005} 
+and contains $285$ samples over $17,187$ features. The target variable is binary, hence logistic regression (\textbf{test = "testIndLogistic"}) will be employed. The second 
+one regards survival times (again breast cancer related) \cite{van2002} and contains 78 observations, out of which 44 are censored, with $4,571$ features. Cox regression will be 
+used (\textbf{test = "censIndCR"}). All computations took place in a desktop computer with Intel Core i5-4690K CPU @3.50GHz and 32 GB RAM.
+
+\subsection{Breast cancer dataset}
+\subsubsection{MMPC} 
+
+\begin{alltt}
+\textbf{
+> mmpc1 <- MMPC(target, dataset, max_k = 3, hash = TRUE, 
+test = "testIndLogistic")
+}
+\end{alltt}
+We then re-run MMPC with \textit{max\_k = 4}, but taking into consideration the previous calculations.
+\begin{alltt}
+\textbf{
+> mmpc2 <- MMPC(target, dataset, max_k = 4, hash = TRUE,
+ini = mmpc1@univ, hashObject = mmpc1@hashObject, 
+test = "testIndLogistic")
+}
+\end{alltt}
+\noindent The output is very long verbosed and hence omitted. The running time required the first time (\textbf{mmpc1}) is equal to 70 seconds, while performing $31,385$ likelihood ratio tests. 
+In the second run, \textbf{mmpc2} required only 8 seconds. If the second run was performed independently from the previous run, (performing all tests again) the running time would be equal to 
+75 seconds, while performing $32,021$ statistical tests. It is then obvious that \textbf{mmpc2} performed only $636$ extra tests. There is a non negligible time required to search and extract 
+the information about a test from a hash object, yet, this time is not comparable to the time the performance of a statistical test requires.
+
+Since \textbf{hash} was set to TRUE, by using the command \textbf{certificate.of.exclusion} the user can detect the conditioning variables (if any) responsible for not including a specific 
+predictor variable. In this example, the user might be interested in seeing why a specific gene was not selected. The first variable for example, even though has a statistically significant 
+unconditional association with the target variable, it was not selected by MMPC.
+\\
+\begin{alltt}
+> \textbf{certificate.of.exclusion(1, mmpcObject = mmpc1)}
+$`1`
+         <NA>     statistic       p-value 
+4509.00000000    0.09795647   -0.28197058 
+\end{alltt}
+\bigskip
+
+The association between the outcome variable and the first feature becomes non significant, when conditioning on the 4509th variable and its p-value is $exp(-0.28197058) = 0.7542959$. 
+
+Throughout all the algorithms the logarithm of the p-values is calculated and stored. When the p-value is less than $10^{-16}$ (machine epsilon), R rounds the p-value to 0. When there are 
+more than one p-value rounded to 0, the smallest p-value is decided at random. If this situation takes place very often inside the algorithm the final output might no be what is expected. 
+Since, all p-value based algorithms are based on ordering the p-values, this is a crucial and key element of the algorithms and caution, or the logarithm of the p-value, must be taken.   
+
+Suppose now one is interested in running MMPC for many combinations of \textbf{max\_k} and \textbf{threshold}. This can be done by using \textbf{mmpc.path} which is essentially a hyper-parameter 
+tuning, grid search function, for choosing the optimal configuration of the the \textbf{threshold} and \textbf{max\_k}. The output for this dataset is
+\\
+\begin{alltt}
+$bic
+            max_k=4  max_k=3  max_k=2
+alpha=0.05 111.6808 125.5517 146.9647
+alpha=0.01 116.4926 116.4926 126.2583
+
+$size
+           max_k=4 max_k=3 max_k=2
+alpha=0.05       8      13      25
+alpha=0.01       6       6      10
+\end{alltt}
+\bigskip
+
+The element \textit{bic} contains the BIC for the regression model applied to the selected features using each combination of \textbf{max\_k} and \textbf{threshold}. The element \textit{size} 
+shows the number of the selected features. The extra element (not shown here) is another list with the selected features for each combination of \textbf{max\_k} and \textbf{threshold}. As 
+for the running time, that was only 160 seconds. This function takes into account the computational benefits of the hash tables and for every subsequent runs of MMPC performs fewer tests. 
+
+\subsubsection{FBED} 
+
+FBED using likelihood ratio tests and eBIC were run as well with K=0. This means that no repetitions were performed.  
+\\
+\begin{alltt}
+> \textbf{fbed1 <- fbed.reg(target, dataset, 
+method = "LR", test = "tesTIndLogistic") 
+
+fbed1$res
+     sel       stat       pval
+1   4509 101.490982 -53.290889
+2  17606  52.394553 -28.420720
+3   3856  26.829649 -15.319679
+4  16361  12.597669  -7.859082
+5  11797  11.643982  -7.347647
+6  16837  10.053095  -6.488439
+7   3157  18.446479 -10.954777
+8   3400   6.693620  -4.638122
+9   1457   9.695889  -6.294297
+10  4404   5.267671  -3.829289
+}
+> \textbf{fbed2 <- fbed.reg(target, dataset, 
+test = "tesTIndLogistic", method = "eBIC") }
+
+fbed2$res
+      Vars     eBIC
+[1,]  4509 247.0451
+[2,] 17606 149.3605
+[3,]  3856 127.9701
+[4,] 16361 123.8473
+[5,] 11797 128.0821
+[6,]  4404 120.8556
+\end{alltt}
+\bigskip
+
+One element of the returned output is displayed above. The p-value based selection (likelihood ratio test) required 55 seconds, performed 28,688 tests and selected 10 variables. 
+The eBIC based selection required 45 seconds, performed 23,641 tests and selected 6 variables. 
+
+\subsubsection{gOMP}
+
+gOMP required 1.5 seconds and selected 9 variables.  
+\\
+\begin{alltt}
+> \textbf{gomp(target, dataset, test = "testIndLogistic") }
+\end{alltt}
+\bigskip
+
+The element \textit{res} presented below is one of the elements of the returned output. The first column shows the selected variables in order of inclusion and the second column is 
+the deviance of each regression model. The first line refers to the regression model with 0 predictor variables (constant term only).
+\\
+\begin{alltt}
+$res
+      Selected Vars  Deviance
+ [1,]             0 332.55696
+ [2,]          4509 156.33519
+ [3,]         17606 131.04428
+ [4,]          3856 113.78382
+ [5,]         10101  95.76704
+ [6,]         16759  80.25748
+ [7,]          6466  67.78120
+ [8,]         11524  54.54652
+ [9,]          9794  44.17957
+[10,]          4728  36.52319
+\end{alltt}
+
+\subsection{Survival dataset}
+
+The target variable must be transformed into a \textbf{surv} object using the command \textbf{Surv} in the package \textit{survival} \citep{therneau2011survival}.
+
+\subsubsection{MMPC} 
+MMPC selected the following features
+\begin{alltt}
+> \textbf{mmpc <- MMPC(target, dataset, test = "censIndCR")
+ses@selectedVars
+[1,] 1458 3872 3945 4554
+}
+\end{alltt}
+A useful command is \textbf{mmpc.model} which returns the regression model with the features selected by MMPC. The output for this dataset is
+\begin{alltt}
+> \textbf{mmpc.model(target, dataset, mmpcObject = mmpc)
+$mod
+Call:
+survival::coxph(formula = target ~ ., data = data.frame(dataset[, 
+    signature]), weights = wei)
+
+          coef exp(coef) se(coef)     z       p
+V1460   3.9013   49.4644   1.0176  3.83 0.00013
+V3874  -4.5911    0.0101   1.6634 -2.76 0.00578
+V3947  -3.5580    0.0285   0.8700 -4.09 4.3e-05
+V4556   5.6801  292.9789   1.7448  3.26 0.00113
+
+Likelihood ratio test=46.6  on 4 df, p=1.82e-09
+n= 78, number of events= 44 
+
+$signature
+V1460 V3874 V3947 V4556   bic 
+ 1458  3872  3945  4554   219 
+}
+\end{alltt}
+
+\subsubsection{FBED} 
+
+The selected variables discovered by FBED using likelihood ratio test and eBIC (they are the same in this dataset)
+\begin{alltt}
+\textbf{
+fbed1$res
+   sel      stat       pval
+1 3872 12.027483  -6.013742
+2 3945 22.729195 -11.364597
+3 1458 13.540375  -6.770188
+4 4554 12.912292  -6.456146
+5 4325  8.072538  -4.036269
+6  386  7.128295  -3.564147
+}
+\end{alltt}
+and 
+\begin{alltt}
+\textbf{
+fbed2$res
+     Vars     eBIC
+[1,] 3872 222.0323
+[2,] 3945 232.7340
+[3,] 1458 223.5452
+[4,] 4554 222.9171
+[5,] 4325 218.0773
+[6,]  386 217.1331
+}
+\end{alltt}
+respectively. We can see that both methods selected the same variables. 
+
+Similarly to the command \textbf{mmpc.path} applied to MMPC, FBED gives the user the option to output all results for different values of K. As mentioned in the description of FBED, 
+the argument \textbf{K} determines the number of re-runs of FBED. The default value is 0. The user can either specify a single value for K, or a range of values of K and gather the 
+path of solutions for many values of re-runs. For example, by calling \textbf{fbed.reg} with \textbf{K=0:3} we get the following results
+\begin{alltt}
+\textbf{
+$res$info
+    Number of vars Number of tests
+K=0              6            5073
+K=1             10            4885
+K=2             16            5198
+K=3             21            4988
+
+$mod$`K=0`
+  Vars      stat log p-value
+1 3872 12.027483   -6.013742
+2 3945 22.729195  -11.364597
+3 1458 13.540375   -6.770188
+4 4554 12.912292   -6.456146
+5 4325  8.072538   -4.036269
+6  386  7.128295   -3.564147
+
+$mod$`K=1`
+   Vars      stat log p-value
+1  3872 37.157121  -18.578561
+2  3945 16.746585   -8.373293
+3  1458 38.083482  -19.041741
+4  4554 11.794991   -5.897496
+5  4325 11.519512   -5.759756
+6   386 27.296062  -13.648031
+7  3805 15.395575   -7.697788
+8  4689 16.185231   -8.092616
+9  1682 12.446433   -6.223216
+10 2355  6.544932   -3.272466
+
+$mod$`K=2` (committed)
+$mod$`K=3` (ommitted)
+}
+\end{alltt}
+
+We re-ran FBED using \textit{K=1} and called the command \textbf{fbedreg.bic} which takes as inputs the target variable, the dataset, the object where the FBED results 
+are saved, the test used (\textbf{"censIndCR"} in our case). The function plots the BIC a function of the selected variables in the order they were selected. The produced 
+plot is presented in Figure~\ref{fig}. The results of the FBED run along with the relevant BIC values and the final regression model are two arguments (not presented here) 
+returned as well.
+
+\begin{figure}[!t]
+\centering
+\includegraphics[scale = 0.5]{bic-eps-converted-to.pdf}
+\caption{Successive BIC values for the Cox regression using the selected variables in order of inclusion.}
+\label{fig}
+\end{figure}
+
+\subsubsection{gOMP} 
+
+As for gOMP the results are
+\begin{alltt}
+\textbf{
+      Selected Vars Deviance
+ [1,]             0 250.6345
+ [2,]          3945 240.3924
+ [3,]          2874 225.6243
+ [4,]           520 209.1400
+ [5,]          4402 200.6827
+ [6,]          1467 186.0771
+ [7,]          3212 173.5159
+ [8,]          4130 151.6564
+ [9,]          3095 146.3925
+}
+\end{alltt}
+
+A final command not mentioned earlier is the \textbf{reg.fit} which accepts any type of target variable and fits any regression model currently available in \textit{MXM}. 
+This is more general than \textbf{mmpc.model} and \textbf{ses.model} since it does not depend on the output of any algorithm. The command \textbf{reg.fit} has a long list of 
+arguments, covering many regression algorithms. Cross-validation procedures currently exist for \textit{MMPC} and \textit{SES} only (and their \textit{Wald} and 
+\textit{perm} versions). The relevant commands are \textbf{cv.mmpc} and \textbf{cv.ses} respectively.
+
+\subsection*{Acknowledgments}
+The research leading to these results has received funding from the European Research Coun-
+cil under the European Union's Seventh Framework Programme (FP/2007-2013) / ERC Grant
+Agreement n. 617393.
+
+
+\bibliographystyle{apa}
+\bibliography{bibliography}
+
+\end{document}
+
